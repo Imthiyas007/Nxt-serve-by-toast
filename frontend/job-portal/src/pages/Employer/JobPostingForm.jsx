@@ -55,13 +55,26 @@ const JobPostingForm = () => {
     }
   };
 
+  const isFormValid = () => {
+    const validationErrors = {};
+    if (!formData.jobTitle?.trim()) validationErrors.jobTitle = "Job title is required";
+    if (!formData.location?.trim()) validationErrors.location = "Location is required";
+    if (!formData.category?.trim()) validationErrors.category = "Category is required";
+    if (!formData.jobType?.trim()) validationErrors.jobType = "Job type is required";
+    if (!formData.description?.trim()) validationErrors.description = "Description is required";
+    if (!formData.requirements?.trim()) validationErrors.requirements = "Requirements are required";
+    if (!formData.salaryMin) validationErrors.salaryMin = "Minimum salary is required";
+    if (!formData.salaryMax) validationErrors.salaryMax = "Maximum salary is required";
+    if (Number(formData.salaryMin) >= Number(formData.salaryMax)) {
+      validationErrors.salary = "Minimum salary must be less than maximum salary";
+    }
+    setErrors(validationErrors);
+    return Object.keys(validationErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validateForm(formData);
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
+    if (!isFormValid()) return;
 
     setIsSubmitting(true);
 

@@ -65,8 +65,14 @@ exports.getApplicantsForJob = async (req, res) => {
 exports.getApplicationById = async (req, res) => {
   try {
     const app = await Application.findById(req.params.id)
-      .populate("job", "title")
-      .populate("job.company", "name email avatar")
+      .populate({
+        path: "job",
+        select: "title",
+        populate: {
+          path: "company",
+          select: "name email avatar",
+        },
+      })
       .populate("applicant", "name email avatar resume");
 
     if (!app) return res.status(404).json({ message: "Application not found.", id: req.params.id });

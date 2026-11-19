@@ -54,7 +54,7 @@ const Header = () => {
             {isAuthenticated ? (
               <div className="flex items-center space-x-3">
                 <span className="text-[#676664]">
-                  {t("welcome")}, {user?.fullName}
+                  {t("welcome")}, {user?.name}
                 </span>
                 <a
                   href={

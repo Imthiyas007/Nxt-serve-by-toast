@@ -1,5 +1,5 @@
 export const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://nextserve-backend.onrender.com";
+  import.meta.env.VITE_API_BASE_URL || "https://nxt-serve-by-toast.onrender.com";
 
 export const API_PATHS = {
   AUTH: {
