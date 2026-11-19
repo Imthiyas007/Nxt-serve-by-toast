@@ -131,43 +131,6 @@ const JobPostingForm = () => {
     }
   };
 
-  const validateForm = (formData) => {
-    const errors = {};
-
-    if (!formData.jobTitle.trim()) {
-      errors.jobTitle = "Job title is required";
-    }
-
-    if (!formData.category) {
-      errors.category = "Please select a category";
-    }
-
-    if (!formData.jobType) {
-      errors.jobType = "Please select a job type";
-    }
-
-    if (!formData.description.trim()) {
-      errors.description = "Job description is required";
-    }
-
-    if (!formData.requirements.trim()) {
-      errors.requirements = "Job requirements are required";
-    }
-
-    if (!formData.salaryMin || !formData.salaryMax) {
-      errors.salary = "Both minimum and maximum salary are required";
-    } else if (parseInt(formData.salaryMin) >= parseInt(formData.salaryMax)) {
-      errors.salary = "Maximum salary must be greater than minimum salary";
-    }
-
-    return errors;
-  };
-
-  const isFormValid = () => {
-    const validationErrors = validateForm(formData);
-    return Object.keys(validationErrors).length === 0;
-  };
-
   useEffect(() => {
     const fetchJobDetails = async () => {
       if (jobId) {
