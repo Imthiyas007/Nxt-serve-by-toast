@@ -10,10 +10,12 @@
 @layer base {
   html {
     font-family: var(--font-display);
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    background-color: #FEF7F4; /* replaced #f7fafe with your main background */
+    background-color: #FEF7F4;
     overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
   }
 }
