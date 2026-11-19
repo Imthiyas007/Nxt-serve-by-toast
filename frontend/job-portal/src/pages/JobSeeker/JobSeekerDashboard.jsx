@@ -79,8 +79,6 @@ const JobSeekerDashboard = () => {
         maxSalary: filters.maxSalary,
         category: filters.category,
         type: filters.type,
-        experience: filters.experience,
-        remoteOnly: filters.remoteOnly,
       };
 
       const hasFilters = Object.values(apiFilters).some(
