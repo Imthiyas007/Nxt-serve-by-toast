@@ -39,23 +39,27 @@ app.use(
   })
 );
 
-// Content-Security-Policy header for all responses
-app.use((req, res, next) => {
-  res.setHeader(
-    "Content-Security-Policy",
-    "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com; script-src 'self'; connect-src 'self' https://nxt-serve-by-toast.onrender.com https://nextserve-backend.onrender.com;"
-  );
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  next();
+// Root route — prevents "Cannot GET /" when accessing backend directly
+app.get("/", (_req, res) => {
+  res.json({
+    status: "ok",
+    service: "NxtServe Backend API",
+    version: "1.0.0",
+    endpoints: {
+      auth: "/api/auth",
+      user: "/api/user",
+      jobs: "/api/jobs",
+      applications: "/api/applications",
+      savedJobs: "/api/save-jobs",
+      analytics: "/api/analytics",
+      health: "/api/health",
+    },
+  });
 });
 
-// Serve favicon with CSP-friendly headers
+// Favicon — return 204 (no content) so browser uses default
 app.get("/favicon.ico", (_req, res) => {
-  res.setHeader(
-    "Content-Security-Policy",
-    "default-src 'none'; img-src 'self' data:;"
-  );
-  res.status(204).end(); // No content - browser will use default favicon
+  res.status(204).end();
 });
 
 // Rate limiting for auth routes
