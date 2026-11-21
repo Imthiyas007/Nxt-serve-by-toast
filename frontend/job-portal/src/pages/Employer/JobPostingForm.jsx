@@ -55,7 +55,7 @@ const JobPostingForm = () => {
     }
   };
 
-  const isFormValid = () => {
+  const validateForm = () => {
     const validationErrors = {};
     if (!formData.jobTitle?.trim()) validationErrors.jobTitle = "Job title is required";
     if (!formData.location?.trim()) validationErrors.location = "Location is required";
@@ -63,18 +63,33 @@ const JobPostingForm = () => {
     if (!formData.jobType?.trim()) validationErrors.jobType = "Job type is required";
     if (!formData.description?.trim()) validationErrors.description = "Description is required";
     if (!formData.requirements?.trim()) validationErrors.requirements = "Requirements are required";
-    if (!formData.salaryMin) validationErrors.salaryMin = "Minimum salary is required";
-    if (!formData.salaryMax) validationErrors.salaryMax = "Maximum salary is required";
-    if (Number(formData.salaryMin) >= Number(formData.salaryMax)) {
+    if (formData.salaryMin === "") validationErrors.salaryMin = "Minimum salary is required";
+    if (formData.salaryMax === "") validationErrors.salaryMax = "Maximum salary is required";
+    if (
+      formData.salaryMin !== "" &&
+      formData.salaryMax !== "" &&
+      Number(formData.salaryMin) >= Number(formData.salaryMax)
+    ) {
       validationErrors.salary = "Minimum salary must be less than maximum salary";
     }
+    return validationErrors;
+  };
+
+  const isFormValid = () => Object.keys(validateForm()).length === 0;
+
+  const handlePreview = () => {
+    const validationErrors = validateForm();
     setErrors(validationErrors);
-    return Object.keys(validationErrors).length === 0;
+    if (Object.keys(validationErrors).length === 0) {
+      setIsPreview(true);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isFormValid()) return;
+    const validationErrors = validateForm();
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
 
     setIsSubmitting(true);
 
@@ -163,7 +178,7 @@ const JobPostingForm = () => {
     };
 
     fetchJobDetails();
-  }, []);
+  }, [jobId]);
 
   if (isPreview) {
     return (
@@ -189,7 +204,8 @@ const JobPostingForm = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <button
-                  onClick={() => setIsPreview(true)}
+                  type="button"
+                  onClick={handlePreview}
                   disabled={!isFormValid()}
                   className="group flex items-center space-x-2 px-6 py-3 text-sm font-medium text-[#6B6A6A] hover:text-[#2A2A2A] bg-white/50 hover:bg-[#FEFAF9] border border-[#FEFAF9] hover:border-transparent rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
@@ -199,7 +215,7 @@ const JobPostingForm = () => {
               </div>
             </div>
 
-            <div className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <InputField
                 label="Job Title"
                 id="jobTitle"
@@ -314,11 +330,15 @@ const JobPostingForm = () => {
                       type="number"
                       placeholder="Min"
                       value={formData.salaryMin}
+                      aria-invalid={Boolean(errors.salaryMin)}
                       onChange={(e) =>
                         handleInputChange("salaryMin", e.target.value)
                       }
                       className="w-full pl-10 pr-3 py-2.5 border border-[#FEFAF9] rounded-lg text-base text-[#2A2A2A] focus:outline-none focus:ring-2 focus:ring-[#EB611F] focus:ring-opacity-20 focus:border-[#EB611F] transition-colors duration-200 bg-white"
                     />
+                    {errors.salaryMin && (
+                      <p className="mt-1 text-sm text-red-600">{errors.salaryMin}</p>
+                    )}
                   </div>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
@@ -328,11 +348,15 @@ const JobPostingForm = () => {
                       type="number"
                       placeholder="Max"
                       value={formData.salaryMax}
+                      aria-invalid={Boolean(errors.salaryMax)}
                       onChange={(e) =>
                         handleInputChange("salaryMax", e.target.value)
                       }
                       className="w-full pl-10 pr-3 py-2.5 border border-[#FEFAF9] rounded-lg text-base text-[#2A2A2A] focus:outline-none focus:ring-2 focus:ring-[#EB611F] focus:ring-opacity-20 focus:border-[#EB611F] transition-colors duration-200 bg-white"
                     />
+                    {errors.salaryMax && (
+                      <p className="mt-1 text-sm text-red-600">{errors.salaryMax}</p>
+                    )}
                   </div>
                 </div>
                 {errors.salary && (
@@ -346,8 +370,8 @@ const JobPostingForm = () => {
               {/* Submit Button */}
               <div className="pt-2">
                 <button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting || !isFormValid()}
+                  type="submit"
+                  disabled={isSubmitting}
                   className="w-full flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-[#EB611F] hover:bg-[#c2410c] focus:outline-none focus:ring-offset-2 focus:ring-[#EB611F] disabled:bg-[#FEFAF9] disabled:text-[#6B6A6A] disabled:cursor-not-allowed transition-colors duration-200"
                 >
                   {isSubmitting ? (
@@ -363,7 +387,7 @@ const JobPostingForm = () => {
                   )}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
