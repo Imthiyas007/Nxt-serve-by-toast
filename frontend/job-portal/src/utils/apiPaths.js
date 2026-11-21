@@ -14,6 +14,21 @@ export const API_PATHS = {
   },
   AI: {
     GENERATE_CONTENT: "/api/ai/generate",
+    MATCHES: "/api/ai/matches",
+  },
+  NEWSLETTER: {
+    SUBSCRIBE: "/api/newsletter",
+  },
+  MESSAGES: {
+    USERS: "/api/messages/users",
+    CONVERSATION: (id) => `/api/messages/conversation/${id}`,
+  },
+  BADGES: {
+    CATALOG: "/api/badges/catalog",
+    MINE: "/api/badges/my",
+    PENDING: "/api/badges/pending",
+    REQUEST: "/api/badges",
+    VERIFY: (id) => `/api/badges/${id}/verify`,
   },
 
   DASHBOARD: {

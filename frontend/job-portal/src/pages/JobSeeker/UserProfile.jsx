@@ -19,6 +19,7 @@ const UserProfile = () => {
     email: user?.email || "",
     avatar: user?.avatar || "",
     resume: user?.resume || "",
+    skills: user?.skills || [],
   });
 
   const [formData, setFormData] = useState({ ...profileData });
@@ -114,6 +115,7 @@ const UserProfile = () => {
       email: user?.email || "",
       avatar: user?.avatar || "",
       resume: user?.resume || "",
+      skills: user?.skills || [],
     };
 
     setProfileData({ ...userData });
@@ -141,6 +143,32 @@ const UserProfile = () => {
             </div>
 
             <div className="p-4 sm:p-8">
+              {user?.role === "jobseeker" && (
+                <div className="mb-6">
+                  <label className="mb-2 block text-sm font-medium text-[#2A2A2A]">
+                    {t("skills")}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.skills.join(", ")}
+                    onChange={(event) =>
+                      handleInputChange(
+                        "skills",
+                        event.target.value
+                          .split(",")
+                          .map((skill) => skill.trim())
+                          .filter(Boolean)
+                      )
+                    }
+                    className="w-full rounded-lg border border-[#FEFAF9] px-4 py-3 text-[#2A2A2A] focus:border-transparent focus:ring-2 focus:ring-[#EB611F]"
+                    placeholder={t("skillsPlaceholder")}
+                  />
+                  <p className="mt-1 text-sm text-[#6B6A6A]">
+                    {t("skillsHelp")}
+                  </p>
+                </div>
+              )}
+
               <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {[
                   { icon: FileText, label: t("resumeLabel"), value: user?.resume ? t("complete") : t("missing") },
@@ -215,36 +243,36 @@ const UserProfile = () => {
                 </div>
 
                 {/* Resume Section */}
-                {user?.resume ? (
-                  <div id="resume-section">
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                      {t("resumeLabel")}
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm text-[#6B6A6A]">
-                        {t("linkLabel")}{" "}
-                        <a
-                          href={user?.resume}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-[#EB611F] underline cursor-pointer hover:text-[#2A2A2A]"
+                <div id="resume-section">
+                  {user?.resume ? (
+                    <>
+                      <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                        {t("resumeLabel")}
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-[#6B6A6A]">
+                          {t("linkLabel")}{" "}
+                          <a
+                            href={user?.resume}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[#EB611F] underline cursor-pointer hover:text-[#2A2A2A]"
+                          >
+                            {user?.resume}
+                          </a>
+                        </p>
+                        <button
+                          type="button"
+                          className="cursor-pointer"
+                          onClick={DeleteResume}
+                          disabled={saving || uploading.resume}
+                          aria-label={t("deleteResume")}
                         >
-                          {user?.resume}
-                        </a>
-                      </p>
-                      <button
-                        type="button"
-                        className="cursor-pointer"
-                        onClick={DeleteResume}
-                        disabled={saving || uploading.resume}
-                        aria-label={t("deleteResume")}
-                      >
-                        <Trash2 className="w-5 h-5 text-red-500" />
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
+                          <Trash2 className="w-5 h-5 text-red-500" />
+                        </button>
+                      </div>
+                    </>
+                  ) : (
                     <label className="block">
                       <span className="sr-only">{t("chooseFile")}</span>
                       <input
@@ -255,8 +283,8 @@ const UserProfile = () => {
                         className="block w-full text-sm text-[#6B6A6A] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#FEFAF9] file:text-[#EB611F] hover:file:bg-[#FEFAF9] hover:file:text-[#2A2A2A] transition-colors"
                       />
                     </label>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               {/* Action Buttons */}

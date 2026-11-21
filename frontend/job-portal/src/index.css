@@ -19,3 +19,22 @@
     -webkit-text-size-adjust: 100%;
   }
 }
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .resume-print,
+  .resume-print * {
+    visibility: visible;
+  }
+
+  .resume-print {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    min-height: auto;
+    padding: 0.5in;
+    box-shadow: none;
+  }
+}

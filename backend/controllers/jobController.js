@@ -26,7 +26,6 @@ exports.getJobs = async (req, res) => {
     type,
     minSalary,
     maxSalary,
-    userId,
   } = req.query;
 
   const query = {
@@ -62,6 +61,8 @@ exports.getJobs = async (req, res) => {
     let savedJobIds = [];
     let appliedJobStatusMap = {};
 
+    const userId =
+      req.user?.role === "jobseeker" ? req.user._id : null;
     if (userId) {
       // Saved Jobs
       const savedJobs = await SavedJob.find({ jobseeker: userId }).select("job");
@@ -128,8 +129,6 @@ exports.getJobsEmployer = async (req, res) => {
 // @desc    Get single job by ID
 exports.getJobById = async (req, res) => {
   try {
-    const { userId } = req.query;
-
     const job = await Job.findById(req.params.id).populate(
       "company",
       "name companyName companyLogo"
@@ -141,6 +140,8 @@ exports.getJobById = async (req, res) => {
 
     let applicationStatus = null;
 
+    const userId =
+      req.user?.role === "jobseeker" ? req.user._id : null;
     if (userId) {
       const application = await Application.findOne({
         job: job._id,
@@ -174,7 +175,24 @@ exports.updateJob = async (req, res) => {
         .json({ message: "Not authorized to update this job" });
     }
 
-    Object.assign(job, req.body);
+    const editableFields = [
+      "title",
+      "description",
+      "requirements",
+      "location",
+      "category",
+      "type",
+      "isRemote",
+      "currency",
+      "salaryMin",
+      "salaryMax",
+    ];
+    const updates = req.body || {};
+    for (const field of editableFields) {
+      if (Object.prototype.hasOwnProperty.call(updates, field)) {
+        job[field] = updates[field];
+      }
+    }
     const updated = await job.save();
     res.json(updated);
   } catch (err) {

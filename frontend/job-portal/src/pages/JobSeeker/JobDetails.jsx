@@ -33,10 +33,7 @@ const JobDetails = () => {
     setLoadError(false);
     try {
       const response = await axiosInstance.get(
-        API_PATHS.JOBS.GET_JOB_BY_ID(jobId),
-        {
-          params: { userId: user?._id || null },
-        }
+        API_PATHS.JOBS.GET_JOB_BY_ID(jobId)
       );
       setJobDetails(response.data);
     } catch (error) {
@@ -45,7 +42,7 @@ const JobDetails = () => {
     } finally {
       setLoading(false);
     }
-  }, [jobId, user]);
+  }, [jobId]);
 
   const applyToJob = async () => {
     if (!user) {
@@ -69,7 +66,7 @@ const JobDetails = () => {
     if (jobId) {
       getJobDetailsById();
     }
-  }, [getJobDetailsById, jobId]);
+  }, [getJobDetailsById, jobId, user]);
 
   return (
     <div className="bg-[#FEF7F4]/95">
@@ -124,6 +121,10 @@ const JobDetails = () => {
 
                 {jobDetails?.applicationStatus ? (
                   <StatusBadge status={jobDetails.applicationStatus} />
+                ) : jobDetails.isClosed ? (
+                  <span className="rounded-full bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-600">
+                    {t("closed")}
+                  </span>
                 ) : user?.role !== "employer" ? (
                   <button
                     type="button"

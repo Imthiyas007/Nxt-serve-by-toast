@@ -8,6 +8,14 @@ exports.applyToJob = async (req, res) => {
       return res.status(403).json({ message: "Only job seekers can apply" });
     }
 
+    const job = await Job.findById(req.params.jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+    if (job.isClosed) {
+      return res.status(400).json({ message: "This job is closed" });
+    }
+
     const existing = await Application.findOne({
       job: req.params.jobId,
       applicant: req.user._id,
@@ -94,7 +102,12 @@ exports.getApplicationById = async (req, res) => {
 // @desc    Update application status (Employer)
 exports.updateStatus = async (req, res) => {
   try {
-     const { status } = req.body;
+    const status = req.body?.status;
+    const allowedStatuses = ["Applied", "In Review", "Rejected", "Accepted"];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid application status" });
+    }
+
     const app = await Application.findById(req.params.id).populate("job");
 
     if (!app || !app.job || app.job.company.toString() !== req.user._id.toString()) {

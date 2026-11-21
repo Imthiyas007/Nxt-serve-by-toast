@@ -36,11 +36,13 @@ exports.getEmployerAnalytics = async (req, res) => {
     // Active Job Posts trend
     const activeJobsLast7 = await Job.countDocuments({
       company: companyId,
+      isClosed: false,
       createdAt: { $gte: last7Days, $lte: now },
     });
 
     const activeJobsPrev7 = await Job.countDocuments({
       company: companyId,
+      isClosed: false,
       createdAt: { $gte: prev7Days, $lt: last7Days },
     });
 

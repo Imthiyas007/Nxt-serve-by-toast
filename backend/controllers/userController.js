@@ -2,6 +2,57 @@ const cloudinary = require("../config/cloudinary");
 const User = require("../models/User");
 const SUPPORTED_LANGUAGES = require("../constants/supportedLanguages");
 
+const resumeEntryFieldLengths = {
+  title: 120,
+  organization: 120,
+  location: 120,
+  startDate: 40,
+  endDate: 40,
+  description: 2000,
+};
+
+const isValidResumeProfile = (resumeProfile) => {
+  if (
+    !resumeProfile ||
+    typeof resumeProfile !== "object" ||
+    Array.isArray(resumeProfile) ||
+    Object.keys(resumeProfile).some(
+      (key) => !["summary", "experience", "education"].includes(key)
+    )
+  ) {
+    return false;
+  }
+  if (
+    resumeProfile.summary !== undefined &&
+    (typeof resumeProfile.summary !== "string" ||
+      resumeProfile.summary.length > 2000)
+  ) {
+    return false;
+  }
+
+  return ["experience", "education"].every((section) => {
+    const entries = resumeProfile[section];
+    return (
+      entries === undefined ||
+      (Array.isArray(entries) &&
+        entries.length <= 20 &&
+        entries.every(
+          (entry) =>
+            entry &&
+            typeof entry === "object" &&
+            !Array.isArray(entry) &&
+            Object.entries(entry).every(
+              ([field, value]) =>
+                Object.hasOwn(resumeEntryFieldLengths, field) &&
+                (value === undefined ||
+                  (typeof value === "string" &&
+                    value.length <= resumeEntryFieldLengths[field]))
+            )
+        ))
+    );
+  });
+};
+
 exports.updatePreferences = async (req, res) => {
   const preferredLanguage = req.body?.preferredLanguage;
   if (!SUPPORTED_LANGUAGES.includes(preferredLanguage)) {
@@ -24,7 +75,28 @@ exports.updatePreferences = async (req, res) => {
 // @desc    Update user profile (name, avatar, company details)
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, avatar, companyName, companyDescription, companyLogo, resume } = req.body;
+    const {
+      name,
+      avatar,
+      companyName,
+      companyDescription,
+      companyLogo,
+      resume,
+      skills,
+      resumeProfile,
+    } = req.body || {};
+    if (
+      skills !== undefined &&
+      (!Array.isArray(skills) ||
+        skills.length > 50 ||
+        skills.some((skill) => typeof skill !== "string" || skill.length > 60))
+    ) {
+      return res.status(400).json({ message: "Invalid skills list" });
+    }
+    if (resumeProfile !== undefined && !isValidResumeProfile(resumeProfile)) {
+      return res.status(400).json({ message: "Invalid resume profile" });
+    }
+
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -32,7 +104,15 @@ exports.updateProfile = async (req, res) => {
     user.avatar = avatar || user.avatar;
     user.resume = resume || user.resume;
 
-    // If employer, allow updating company info
+    if (user.role === "jobseeker") {
+      if (skills !== undefined) {
+        user.skills = [...new Set(skills.map((skill) => skill.trim()).filter(Boolean))];
+      }
+      if (resumeProfile !== undefined) {
+        user.resumeProfile = resumeProfile;
+      }
+    }
+
     if (user.role === "employer") {
       user.companyName = companyName || user.companyName;
       user.companyDescription = companyDescription || user.companyDescription;
@@ -50,6 +130,8 @@ exports.updateProfile = async (req, res) => {
       companyDescription: user.companyDescription,
       companyLogo: user.companyLogo,
       resume: user.resume || "",
+      skills: user.skills || [],
+      resumeProfile: user.resumeProfile || {},
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -113,7 +195,9 @@ exports.deleteResume = async (req, res) => {
 // @desc    Get user public profile
 exports.getPublicProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
+    const user = await User.findById(req.params.id).select(
+      "-password -resumeProfile"
+    );
 
     if (!user) return res.status(404).json({ message: "User not found" });
 

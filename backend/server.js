@@ -12,6 +12,9 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const savedJobsRoutes = require("./routes/savedJobsRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const aiRoutes = require("./routes/aiRoutes");
+const newsletterRoutes = require("./routes/newsletterRoutes");
+const messageRoutes = require("./routes/messageRoutes");
+const skillBadgeRoutes = require("./routes/skillBadgeRoutes");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -68,6 +71,14 @@ const aiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+const newsletterLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { message: "Too many newsletter signup attempts. Please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Connect Database
 connectDB();
 
@@ -86,6 +97,9 @@ app.use("/api/applications", applicationRoutes);
 app.use("/api/save-jobs", savedJobsRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/ai", aiLimiter, aiRoutes);
+app.use("/api/newsletter", newsletterLimiter, newsletterRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/badges", skillBadgeRoutes);
 
 // Health check
 app.get("/api/health", (_req, res) => {

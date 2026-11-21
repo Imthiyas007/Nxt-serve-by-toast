@@ -5,7 +5,7 @@ import StatusBadge from "../StatusBadge";
 import { useTranslation } from "react-i18next";
 import formatSalaryRange from "../../utils/formatSalary";
 
-const JobCard = ({ job, onToggleSave, onApply, saved, hideApply }) => {
+const JobCard = ({ job, onToggleSave, onApply, saved, hideApply, hideSave }) => {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
 
@@ -40,7 +40,7 @@ const JobCard = ({ job, onToggleSave, onApply, saved, hideApply }) => {
             </p>
           </div>
         </div>
-        {user && (
+        {!hideSave && user?.role === "jobseeker" && (
           <button
             type="button"
             className="p-2 hover:bg-[#FEFAF9] rounded-xl transition-colors"

@@ -55,6 +55,34 @@ const ProfileDropdown = ({
           >
             {t("viewProfile")}
           </Link>
+          {userRole === "jobseeker" && (
+            <>
+              <Link
+                to="/resume-builder"
+                className="block px-4 py-2 text-sm text-[#6B6A6A] hover:bg-[#FEFAF9] transition-colors"
+              >
+                {t("resumeBuilder")}
+              </Link>
+              <Link
+                to="/matches"
+                className="block px-4 py-2 text-sm text-[#6B6A6A] hover:bg-[#FEFAF9] transition-colors"
+              >
+                {t("jobMatches")}
+              </Link>
+            </>
+          )}
+          <Link
+            to="/messages"
+            className="block px-4 py-2 text-sm text-[#6B6A6A] hover:bg-[#FEFAF9] transition-colors"
+          >
+            {t("messages")}
+          </Link>
+          <Link
+            to="/skill-badges"
+            className="block px-4 py-2 text-sm text-[#6B6A6A] hover:bg-[#FEFAF9] transition-colors"
+          >
+            {t("skillBadges")}
+          </Link>
           <Link
             to="/settings"
             className="block px-4 py-2 text-sm text-[#6B6A6A] hover:bg-[#FEFAF9] transition-colors"

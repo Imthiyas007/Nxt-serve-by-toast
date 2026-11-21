@@ -1,10 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 const SalaryRangeSlider = ({ filters, handleFilterChange }) => {
   const { t } = useTranslation();
   const [minSalary, setMinSalary] = useState(filters?.minSalary || 0);
   const [maxSalary, setMaxSalary] = useState(filters?.maxSalary || 0);
+
+  useEffect(() => {
+    setMinSalary(filters?.minSalary || 0);
+  }, [filters?.minSalary]);
+
+  useEffect(() => {
+    setMaxSalary(filters?.maxSalary || 0);
+  }, [filters?.maxSalary]);
 
   return (
     <div className="space-y-4">

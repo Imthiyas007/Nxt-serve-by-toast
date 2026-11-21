@@ -43,6 +43,7 @@ const ApplicantProfilePreview = ({
     } catch (err) {
       console.error("Error updating status:", err);
       setCurrentStatus(selectedApplicant.status);
+      toast.error(t("tryAgain"));
     } finally {
       setLoading(false);
     }
@@ -118,6 +119,12 @@ const ApplicantProfilePreview = ({
             <button
               onClick={() =>
                 handleDownloadResume(selectedApplicant.applicant.resume)
+              }
+              disabled={!selectedApplicant.applicant?.resume}
+              aria-label={
+                selectedApplicant.applicant?.resume
+                  ? t("resumeLabel")
+                  : t("notAvailable")
               }
               className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#EB611F] text-white font-medium rounded-lg hover:bg-[#EB611F] transition-colors"
             >

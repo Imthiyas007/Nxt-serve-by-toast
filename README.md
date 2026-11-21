@@ -55,7 +55,8 @@ Add these environment variables in Render's service settings:
 - `MONGO_URI`: the production MongoDB connection string
 - `JWT_SECRET`: a newly generated, long random secret
 - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`: credentials for the upload storage account
-- `GEMINI_API_KEY`: a Gemini API key for the interview-preparation feature
+- `GEMINI_API_KEY`: a Gemini API key for interview preparation and job matching
+- `RESEND_API_KEY` and `RESEND_AUDIENCE_ID`: Resend credentials and audience for newsletter subscriptions
 - `FRONTEND_URL`: one or more deployed frontend origins, separated by commas and without trailing slashes. The canonical `nxt-serve-by-toast.vercel.app` domain and this project's Vercel preview deployments are also allowed.
 
 Render supplies `PORT` automatically. After deployment, copy the service URL, for example `https://your-api.onrender.com`.
@@ -72,7 +73,11 @@ Set this environment variable in Vercel for the production environment:
 
 - `VITE_API_BASE_URL`: the Render API origin, for example `https://your-api.onrender.com` (no trailing slash)
 
-The Gemini key must be configured only on the API service. The frontend calls the API proxy, which keeps the key out of the browser bundle and applies request limits. Redeploy the API after changing its environment variables.
+The Gemini and Resend keys must be configured only on the API service. The frontend calls the API proxy, which keeps keys out of the browser bundle and applies request limits. Redeploy the API after changing its environment variables.
+
+The privacy and terms pages in this repository are draft text, not legal advice. Have qualified counsel and the service operator review and complete them before publication.
+
+Jobseeker messages and resume profiles are stored in MongoDB. Resume PDF export uses the browser's print dialog. Employers can verify badge requests only for users who applied to one of their jobs.
 
 ### 4. Verify
 

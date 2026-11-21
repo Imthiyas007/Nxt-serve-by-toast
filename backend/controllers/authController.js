@@ -27,6 +27,8 @@ exports.register = async (req, res) => {
       companyDescription: user.companyDescription || '',
       companyLogo: user.companyLogo || '',
       resume: user.resume || '',
+      skills: user.skills || [],
+      resumeProfile: user.resumeProfile || {},
     });
 
   } catch (err) {
@@ -55,6 +57,8 @@ exports.login = async (req, res) => {
       companyDescription: user.companyDescription || '',
       companyLogo: user.companyLogo || '',
       resume: user.resume || '',
+      skills: user.skills || [],
+      resumeProfile: user.resumeProfile || {},
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

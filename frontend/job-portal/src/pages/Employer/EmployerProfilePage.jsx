@@ -46,6 +46,7 @@ const EmployerProfilePage = () => {
       handleInputChange(field, avatarUrl);
     } catch (error) {
       console.error("Image upload failed:", error);
+      toast.error(t("tryAgain"));
     } finally {
       setUploading((prev) => ({ ...prev, [type]: false }));
     }
@@ -78,6 +79,7 @@ const EmployerProfilePage = () => {
       }
     } catch (error) {
       console.error("Profile update failed:", error);
+      toast.error(t("tryAgain"));
     } finally {
       setSaving(false);
     }

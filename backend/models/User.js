@@ -2,6 +2,27 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const SUPPORTED_LANGUAGES = require("../constants/supportedLanguages");
 
+const resumeEntrySchema = new mongoose.Schema(
+  {
+    title: { type: String, maxlength: 120 },
+    organization: { type: String, maxlength: 120 },
+    location: { type: String, maxlength: 120 },
+    startDate: { type: String, maxlength: 40 },
+    endDate: { type: String, maxlength: 40 },
+    description: { type: String, maxlength: 2000 },
+  },
+  { _id: false }
+);
+
+const resumeProfileSchema = new mongoose.Schema(
+  {
+    summary: { type: String, maxlength: 2000 },
+    experience: { type: [resumeEntrySchema], default: [] },
+    education: { type: [resumeEntrySchema], default: [] },
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -10,6 +31,8 @@ const userSchema = new mongoose.Schema({
   preferredLanguage: { type: String, enum: SUPPORTED_LANGUAGES },
   avatar: String,
   resume: String,
+  skills: { type: [String], default: [] },
+  resumeProfile: { type: resumeProfileSchema, default: () => ({}) },
   // for employer
   companyName: String,
   companyDescription: String,

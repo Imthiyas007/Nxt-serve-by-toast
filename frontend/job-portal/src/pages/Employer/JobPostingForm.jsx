@@ -171,16 +171,15 @@ const JobPostingForm = () => {
             });
           }
         } catch (error) {
-          console.error("Error fetching job details");
-          if (error.response) {
-            console.error("API Error:", error.response.data.message);
-          }
+          console.error("Error fetching job details:", error);
+          toast.error(error.response?.data?.message || t("tryAgain"));
+          navigate("/manage-jobs");
         }
       }
     };
 
     fetchJobDetails();
-  }, [jobId]);
+  }, [jobId, navigate, t]);
 
   if (isPreview) {
     return (

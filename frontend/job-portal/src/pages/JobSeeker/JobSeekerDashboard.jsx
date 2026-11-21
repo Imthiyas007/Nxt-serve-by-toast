@@ -54,8 +54,6 @@ const JobSeekerDashboard = () => {
       if (filterParams.maxSalary) params.append("maxSalary", filterParams.maxSalary);
       if (filterParams.type) params.append("type", filterParams.type);
       if (filterParams.category) params.append("category", filterParams.category);
-      if (user) params.append("userId", user?._id);
-
       const response = await axiosInstance.get(
         `${API_PATHS.JOBS.GET_ALL_JOBS}?${params.toString()}`
       );
@@ -72,7 +70,7 @@ const JobSeekerDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [t, user]);
+  }, [t]);
 
   useEffect(() => {
     searchTimeoutRef.current = setTimeout(() => {
@@ -89,7 +87,7 @@ const JobSeekerDashboard = () => {
     }, 500);
 
     return () => clearTimeout(searchTimeoutRef.current);
-  }, [fetchJobs, filters]);
+  }, [fetchJobs, filters, user]);
 
   const handleSearch = () => {
     clearTimeout(searchTimeoutRef.current);

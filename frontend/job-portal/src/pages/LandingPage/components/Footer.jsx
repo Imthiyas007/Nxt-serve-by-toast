@@ -4,6 +4,8 @@ import { BriefcaseBusiness, Building2, ChevronRight, Mail, ShieldCheck, UserRoun
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../context/useAuth";
 import toast from "react-hot-toast";
+import axiosInstance from "../../../utils/axiosInstance";
+import { API_PATHS } from "../../../utils/apiPaths";
 import logo from "../../../assets/nxtserve-logo.png";
 
 const Footer = () => {
@@ -11,6 +13,8 @@ const Footer = () => {
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handlePostJobNavigation = (event) => {
     if (isAuthenticated && user?.role !== "employer") {
@@ -19,15 +23,31 @@ const Footer = () => {
     }
   };
 
-  const handleSubscribe = (event) => {
+  const handleSubscribe = async (event) => {
     event.preventDefault();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       toast.error(t("invalidEmail"));
       return;
     }
-    setSubscribed(true);
-    setEmail("");
-    toast.success(t("newsletterSubscribed"));
+    if (!consent) {
+      toast.error(t("newsletterConsentRequired"));
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await axiosInstance.post(API_PATHS.NEWSLETTER.SUBSCRIBE, {
+        email: email.trim(),
+        consent: true,
+      });
+      setSubscribed(true);
+      setEmail("");
+      toast.success(t("newsletterSubscribed"));
+    } catch (error) {
+      toast.error(error.response?.data?.message || t("tryAgain"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -72,14 +92,30 @@ const Footer = () => {
                     type="email"
                     value={email}
                     onChange={(event) => { setEmail(event.target.value); setSubscribed(false); }}
+                    required
                     placeholder={t("enterYourEmail")}
                     className="h-11 w-full rounded-lg border border-white/15 bg-white/10 pl-10 pr-3 text-sm text-white placeholder:text-white/50 focus:border-[#FF7A00] focus:outline-none focus:ring-2 focus:ring-[#FF7A00]/30"
                   />
                 </div>
-                <button type="submit" className="h-11 rounded-lg bg-[#F53900] px-5 text-sm font-semibold text-white hover:bg-[#FF6500] focus:outline-none focus:ring-2 focus:ring-[#FF7A00] focus:ring-offset-2 focus:ring-offset-[#22252D]">
+                <button type="submit" disabled={isSubmitting} className="h-11 rounded-lg bg-[#F53900] px-5 text-sm font-semibold text-white hover:bg-[#FF6500] focus:outline-none focus:ring-2 focus:ring-[#FF7A00] focus:ring-offset-2 focus:ring-offset-[#22252D] disabled:cursor-not-allowed disabled:opacity-60">
                   {subscribed ? t("subscribed") : t("subscribe")}
                 </button>
               </div>
+              <label className="mt-3 flex items-start gap-2 text-xs leading-5 text-white/70">
+                <input
+                  type="checkbox"
+                  checked={consent}
+                  onChange={(event) => setConsent(event.target.checked)}
+                  required
+                  className="mt-1 accent-[#F53900]"
+                />
+                <span>
+                  {t("newsletterConsent")}{" "}
+                  <Link to="/privacy-policy" className="underline hover:text-white">
+                    {t("privacyPolicy")}
+                  </Link>
+                </span>
+              </label>
             </form>
           </div>
         </div>
@@ -97,8 +133,12 @@ const Footer = () => {
         <div className="mt-8 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} NxtServe. {t("rightsReserved")}</p>
           <div className="flex gap-5">
-            <span>{t("privacyPolicy")}</span>
-            <span>{t("terms")}</span>
+            <Link to="/privacy-policy" className="hover:text-white">
+              {t("privacyPolicy")}
+            </Link>
+            <Link to="/terms" className="hover:text-white">
+              {t("terms")}
+            </Link>
           </div>
         </div>
       </div>
