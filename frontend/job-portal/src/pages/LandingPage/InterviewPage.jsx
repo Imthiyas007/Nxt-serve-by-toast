@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+const TEXT_MODEL = 'gemini-3.5-flash-lite';
+const TTS_MODEL = 'gemini-3.8-flash-tts';
+
 // Main component for the interview chatbot
 const InterviewPage = () => {
     // State variables to manage the chatbot's UI and data
@@ -61,6 +64,12 @@ const InterviewPage = () => {
     // Helper function to call the Gemini API with exponential backoff for retries
     const callGeminiAPI = async (payload, model) => {
         const apiKey = import.meta.env.VITE_GEMINI_API_KEY; // Ensure this is set in your environment variables
+        if (!apiKey) {
+            const message = 'Gemini API key is missing. Set VITE_GEMINI_API_KEY and redeploy the frontend.';
+            setApiError(message);
+            return null;
+        }
+
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
         let retries = 0;
@@ -76,6 +85,8 @@ const InterviewPage = () => {
                 });
 
                 if (!response.ok) {
+                    const errorBody = await response.json().catch(() => null);
+                    const detail = errorBody?.error?.message;
                     if (response.status === 401) {
                         setApiError('Authentication Error (401): The API key is likely missing or invalid.');
                         throw new Error('Authentication Error (401)');
@@ -85,7 +96,10 @@ const InterviewPage = () => {
                         retries++;
                         continue;
                     }
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    if (response.status === 404) {
+                        throw new Error(detail || `Gemini model "${model}" was not found or is unavailable to this API key.`);
+                    }
+                    throw new Error(detail || `HTTP error! status: ${response.status}`);
                 }
 
                 const result = await response.json();
@@ -147,7 +161,7 @@ const InterviewPage = () => {
 
         const payload = {
             contents: [{
-                parts: [{ text: `Say in an informative tone: ${text}` }]
+                parts: [{ text }]
             }],
             generationConfig: {
                 responseModalities: ["AUDIO"],
@@ -160,17 +174,19 @@ const InterviewPage = () => {
         };
 
         try {
-            const result = await callGeminiAPI(payload, "gemini-2.5-flash-preview-tts");
+            const result = await callGeminiAPI(payload, TTS_MODEL);
             const part = result?.candidates?.[0]?.content?.parts?.[0];
             const audioData = part?.inlineData?.data;
             const mimeType = part?.inlineData?.mimeType;
 
             if (audioData && mimeType && mimeType.startsWith("audio/")) {
                 const sampleRateMatch = mimeType.match(/rate=(\d+)/);
-                const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 16000;
+                const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
                 
-                const pcmData = Uint8Array.from(atob(audioData), c => c.charCodeAt(0)).buffer;
-                const wavBlob = pcmToWav(pcmData, sampleRate);
+                const audioBytes = Uint8Array.from(atob(audioData), c => c.charCodeAt(0));
+                const wavBlob = mimeType.includes("wav")
+                    ? new Blob([audioBytes], { type: mimeType })
+                    : pcmToWav(audioBytes.buffer, sampleRate);
                 const audioUrl = URL.createObjectURL(wavBlob);
                 
                 const audio = new Audio(audioUrl);
@@ -201,7 +217,7 @@ const InterviewPage = () => {
             generationConfig: { responseMimeType: "text/plain" }
         };
         
-        const responseText = await callGeminiAPI(payload, "gemini-2.5-flash-preview-05-20");
+        const responseText = await callGeminiAPI(payload, TEXT_MODEL);
         const text = responseText?.candidates?.[0]?.content?.parts?.[0]?.text || 'Failed to get a response.';
         setMessages([{ sender: 'ai', text }]);
         setIsLoading(false);
@@ -231,7 +247,7 @@ const InterviewPage = () => {
             generationConfig: { responseMimeType: "text/plain" }
         };
         
-        const responseText = await callGeminiAPI(payload, "gemini-2.5-flash-preview-05-20");
+        const responseText = await callGeminiAPI(payload, TEXT_MODEL);
         const text = responseText?.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, I could not generate a response. Please try again.';
         setMessages(prevMessages => [...prevMessages, { sender: 'ai', text }]);
         setIsLoading(false);
@@ -276,7 +292,7 @@ const InterviewPage = () => {
             }
         };
 
-        const response = await callGeminiAPI(payload, "gemini-2.5-flash-preview-05-20");
+        const response = await callGeminiAPI(payload, TEXT_MODEL);
 
         if (response) {
             try {
@@ -336,7 +352,7 @@ const InterviewPage = () => {
             }
         };
 
-        const response = await callGeminiAPI(payload, "gemini-2.5-flash-preview-05-20");
+        const response = await callGeminiAPI(payload, TEXT_MODEL);
         
         // Check if response is valid before parsing
         if (response) {
@@ -627,6 +643,11 @@ const InterviewPage = () => {
                 </div>
 
                 {/* Dynamic content based on the current view state */}
+                {apiError && view !== 'interview' && (
+                    <div className="mx-6 mt-4 rounded-xl bg-red-500 p-3 text-center text-sm font-medium text-white shadow-md" role="alert">
+                        {apiError}
+                    </div>
+                )}
                 {view === 'jobAnalysis' && renderJobAnalysis()}
                 {view === 'roleSelection' && renderRoleSelection()}
                 {view === 'interview' && renderInterviewChat()}

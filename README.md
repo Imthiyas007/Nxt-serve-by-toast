@@ -37,7 +37,7 @@ Keep `.env` files and production secrets private. Never put database credentials
    npm run dev
    ```
 
-   The frontend uses `VITE_API_BASE_URL=http://localhost:5000` from its `.env` file.
+   The frontend uses `VITE_API_BASE_URL=http://localhost:5000` from its `.env` file. Set `VITE_GEMINI_API_KEY` there as well to enable interview practice.
 
 ## Deploy
 
@@ -74,8 +74,9 @@ Import the same repository into Vercel and set:
 Set this environment variable in Vercel for the production environment:
 
 - `VITE_API_BASE_URL`: the Render API origin, for example `https://your-api.onrender.com` (no trailing slash)
+- `VITE_GEMINI_API_KEY`: a Gemini API key for the interview-preparation feature
 
-Deploy or redeploy the frontend after changing environment variables. Vite embeds them at build time.
+Deploy or redeploy the frontend after changing environment variables. Vite embeds them at build time, so the Gemini key is visible in the client bundle; restrict it to the Gemini API and your frontend's HTTP referrers.
 
 ### 4. Verify
 
