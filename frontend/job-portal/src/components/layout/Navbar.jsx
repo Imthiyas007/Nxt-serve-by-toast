@@ -28,15 +28,15 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
+          <Link to="/" className="flex min-w-0 items-center space-x-3">
             <div className="w-20 h-25 rounded-lg flex items-center justify-center">
-             <img src={logo} alt="NxtServe Logo" className="w-22 h-20 text-white" />
+             <img src={logo} alt="NxtServe" className="h-10 w-auto object-contain" />
             </div>
           </Link>
 
           {/* Auth Buttons */}
-          <div className="flex items-center space-x-3">
-            {user && (
+          <div className="flex items-center space-x-1 sm:space-x-3">
+            {user?.role === "jobseeker" && (
               <button
                 className="p-2 rounded-xl hover:bg-[#FEFAF9] transition-colors duration-200 relative"
                 onClick={() => navigate("/saved-jobs")}

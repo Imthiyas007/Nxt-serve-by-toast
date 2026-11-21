@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createElement, useEffect, useState } from "react";
 import { Save, X, Trash2 } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
 import axiosInstance from "../../utils/axiosInstance";
@@ -8,6 +8,7 @@ import uploadImage from "../../utils/uploadImage";
 import Navbar from "../../components/layout/Navbar";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Bookmark, Briefcase, FileText, UserRound } from "lucide-react";
 
 const UserProfile = () => {
   const { user, updateUser } = useAuth();
@@ -123,15 +124,39 @@ const UserProfile = () => {
     <div className="bg-[#FEF7F4]/95">
       <Navbar />
 
-      <div className="min-h-screen bg-white py-8 px-4 mt-16 lg:m-20">
+      <div className="min-h-screen bg-[#FEF7F4]/95 py-6 px-3 mt-16 sm:px-6 sm:py-8 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-[#FEFAF9]">
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-[#FEFAF9]">
             {/* Header */}
-            <div className="bg-[#EB611F] px-8 py-6 flex justify-between items-center">
-              <h1 className="text-xl font-medium text-white">{t("viewProfile")}</h1>
+            <div className="bg-gradient-to-r from-[#EB611F] to-[#F97316] px-4 py-5 sm:px-8 sm:py-6">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-white/75">{t("jobSeeker")}</p>
+                  <h1 className="mt-1 text-xl font-semibold text-white sm:text-2xl">{t("viewProfile")}</h1>
+                </div>
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-white/30 bg-white/15">
+                  <UserRound className="h-6 w-6 text-white" />
+                </div>
+              </div>
             </div>
 
-            <div className="p-8">
+            <div className="p-4 sm:p-8">
+              <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {[
+                  { icon: FileText, label: t("resumeLabel"), value: user?.resume ? t("complete") : t("missing") },
+                  { icon: Bookmark, label: t("savedJobs"), value: t("manage") },
+                  { icon: Briefcase, label: t("jobSearch"), value: t("findJobs") },
+                ].map(({ icon: Icon, label, value }) => (
+                  <Link
+                    key={label}
+                    to={label === t("savedJobs") ? "/saved-jobs" : label === t("jobSearch") ? "/find-jobs" : "#resume-section"}
+                    className="flex items-center gap-3 rounded-xl border border-[#FEFAF9] bg-[#FEF7F4]/60 p-4 transition hover:border-[#EB611F]/30 hover:bg-[#FEF7F4]"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EB611F]/10 text-[#EB611F]">{createElement(Icon, { className: "h-5 w-5", "aria-hidden": true })}</span>
+                    <span className="min-w-0"><span className="block text-xs text-[#6B6A6A]">{label}</span><span className="block truncate text-sm font-semibold text-[#2A2A2A]">{value}</span></span>
+                  </Link>
+                ))}
+              </div>
               <div className="space-y-6">
                 {/* Avatar Upload */}
                 <div className="flex items-center space-x-4">
@@ -191,7 +216,7 @@ const UserProfile = () => {
 
                 {/* Resume Section */}
                 {user?.resume ? (
-                  <div>
+                  <div id="resume-section">
                     <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
                       {t("resumeLabel")}
                     </label>
@@ -235,11 +260,11 @@ const UserProfile = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-[#FEFAF9]">
+              <div className="mt-8 flex flex-col-reverse gap-3 border-t border-[#FEFAF9] pt-6 sm:flex-row sm:justify-end">
                                 <Link
                   onClick={handleCancel}
                   to="/find-jobs"
-                  className="px-6 py-3 border border-[#FEFAF9] text-[#6B6A6A] rounded-lg hover:bg-[#FEFAF9] hover:text-[#2A2A2A] transition-colors flex items-center space-x-2"
+                  className="w-full justify-center px-6 py-3 border border-[#FEFAF9] text-[#6B6A6A] rounded-lg hover:bg-[#FEFAF9] hover:text-[#2A2A2A] transition-colors flex items-center space-x-2 sm:w-auto"
                 >
                   <X className="w-4 h-4" />
                   <span>{t("cancel")}</span>
@@ -247,7 +272,7 @@ const UserProfile = () => {
                 <button
                   onClick={handleSave}
                   disabled={saving || uploading.avatar || uploading.resume}
-                  className="px-6 py-3 bg-[#EB611F] text-white rounded-lg hover:bg-[#EB611F]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                  className="w-full justify-center px-6 py-3 bg-[#EB611F] text-white rounded-lg hover:bg-[#EB611F]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2 sm:w-auto"
                 >
                   {saving ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

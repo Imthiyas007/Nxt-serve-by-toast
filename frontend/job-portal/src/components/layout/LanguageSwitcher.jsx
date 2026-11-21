@@ -3,13 +3,20 @@ import { SUPPORTED_LANGUAGES } from '../../locales/languages';
 
 const LanguageSwitcher = ({ onLanguageChange, disabled = false }) => {
   const { t, i18n } = useTranslation();
+  const handleChange = (language) => {
+    if (onLanguageChange) {
+      onLanguageChange(language);
+    } else {
+      i18n.changeLanguage(language);
+    }
+  };
 
   return (
     <select
       aria-label={t('selectLanguage')}
       value={i18n.resolvedLanguage || i18n.language}
       disabled={disabled}
-      onChange={(event) => onLanguageChange(event.target.value)}
+      onChange={(event) => handleChange(event.target.value)}
       className="bg-white border border-gray-300 text-[#676664] rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
     >
       {SUPPORTED_LANGUAGES.map(({ code, label }) => (

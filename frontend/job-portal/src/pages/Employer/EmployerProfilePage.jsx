@@ -118,25 +118,25 @@ const EmployerProfilePage = () => {
   return (
     <DashboardLayout activeMenu="company-profile">
       {user && (
-        <div className="min-h-screen bg-[#FEF7F4]/95 py-8 px-4">
+        <div className="min-h-screen bg-[#FEF7F4]/95 py-6 px-3 sm:px-6 sm:py-8">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-xl border border-[#FEFAF9] shadow-lg overflow-hidden">
               {/* Header */}
-              <div className="bg-[#EB611F] px-8 py-6 flex justify-between items-center">
+              <div className="bg-gradient-to-r from-[#EB611F] to-[#F97316] px-4 py-5 sm:px-8 sm:py-6 flex items-center justify-between gap-3">
                 <h1 className="text-xl font-medium text-white">
                   {t("employerProfile")}
                 </h1>
                 <button
                   onClick={() => setEditMode(true)}
-                  className="bg-white/10 hover:bg-[#FEFAF9] hover:text-[#2A2A2A] text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+                  className="shrink-0 bg-white/15 hover:bg-white hover:text-[#2A2A2A] text-white px-3 py-2 sm:px-4 rounded-lg transition-colors flex items-center space-x-2"
                 >
                   <Edit3 className="w-4 h-4" />
-                  <span>{t("editProfile")}</span>
+                  <span className="hidden sm:inline">{t("editProfile")}</span>
                 </button>
               </div>
 
               {/* Profile Content */}
-              <div className="p-8">
+              <div className="p-4 sm:p-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Personal Information */}
                   <div className="space-y-6">
@@ -195,6 +195,23 @@ const EmployerProfilePage = () => {
                   <p className="text-sm text-[#6B6A6A] leading-relaxed bg-[#FEFAF9] p-6 rounded-lg">
                     {profileData.companyDescription}
                   </p>
+                </div>
+
+                <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                  {[
+                    { title: t("postNewJob"), detail: t("createJobPostingHelp"), to: "/post-job" },
+                    { title: t("jobManagement"), detail: t("manageJobPostings"), to: "/manage-jobs" },
+                    { title: t("recentApplications"), detail: t("latestCandidateApplications"), to: "/manage-jobs" },
+                  ].map((item) => (
+                    <a
+                      key={item.title}
+                      href={item.to}
+                      className="rounded-xl border border-[#FEFAF9] bg-[#FEF7F4]/60 p-4 transition hover:border-[#EB611F]/30 hover:shadow-sm"
+                    >
+                      <p className="font-semibold text-[#2A2A2A]">{item.title}</p>
+                      <p className="mt-1 text-xs leading-5 text-[#6B6A6A]">{item.detail}</p>
+                    </a>
+                  ))}
                 </div>
               </div>
             </div>

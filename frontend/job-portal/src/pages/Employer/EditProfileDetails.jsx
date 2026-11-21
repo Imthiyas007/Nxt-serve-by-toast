@@ -15,7 +15,7 @@ const EditProfileDetails = ({
   return (
     <DashboardLayout activeMenu="company-profile">
       {formData && (
-        <div className="min-h-screen bg-[#FEF7F4]/95 py-8 px-4">
+        <div className="min-h-screen bg-[#FEF7F4]/95 py-6 px-3 sm:px-6 sm:py-8">
           <div className="max-w-4xl mx-auto">
             <div className="bg-[#FEF7F4]/95 rounded-xl shadow-lg overflow-hidden">
               {/* Header */}
@@ -26,7 +26,7 @@ const EditProfileDetails = ({
               </div>
 
               {/* Edit Form */}
-              <div className="p-8">
+              <div className="p-4 sm:p-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Personal Information */}
                   <div className="space-y-6">
@@ -35,7 +35,7 @@ const EditProfileDetails = ({
                     </h2>
 
                     {/* Avatar Upload */}
-                    <div className="flex items-center space-x-4">
+                    <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
                       <div className="relative">
                         <img
                           src={formData?.avatar}
@@ -162,10 +162,10 @@ const EditProfileDetails = ({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-[#FEFAF9]">
+                <div className="mt-8 flex flex-col-reverse gap-3 border-t border-[#FEFAF9] pt-6 sm:flex-row sm:justify-end">
                   <button
                     onClick={handleCancel}
-                    className="px-6 py-3 border border-[#FEFAF9] text-[#2A2A2A] rounded-lg hover:bg-[#FEFAF9] transition-colors flex items-center space-x-2"
+                    className="w-full justify-center px-6 py-3 border border-[#FEFAF9] text-[#2A2A2A] rounded-lg hover:bg-[#FEFAF9] transition-colors flex items-center space-x-2 sm:w-auto"
                   >
                     <X className="w-4 h-4" />
                     <span>{t("cancel")}</span>
@@ -173,7 +173,7 @@ const EditProfileDetails = ({
                   <button
                     onClick={handleSave}
                     disabled={saving || uploading.avatar || uploading.logo}
-                    className="px-6 py-3 bg-[#EB611F] text-[#FEFAF9] rounded-lg hover:bg-[#EB611F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                    className="w-full justify-center px-6 py-3 bg-[#EB611F] text-[#FEFAF9] rounded-lg hover:bg-[#EB611F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2 sm:w-auto"
                   >
                     {saving ? (
                       <div className="w-4 h-4 border-2 border-[#FEFAF9] border-t-transparent rounded-full animate-spin"></div>

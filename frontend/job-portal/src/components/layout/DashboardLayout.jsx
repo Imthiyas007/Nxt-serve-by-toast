@@ -146,8 +146,9 @@ const DashboardLayout = ({ activeMenu, children }) => {
       {/* Mobile overlay */}
       {isMobile && sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/0 bg-opacity-25 z-40 backdrop-blur-xs"
+          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
 
@@ -158,12 +159,14 @@ const DashboardLayout = ({ activeMenu, children }) => {
         }`}
       >
         {/* Top navbar */}
-        <header className="bg-[#FEFAF9]/80 backdrop-blur-sm border-b border-[#FEFAF9] h-16 flex items-center justify-between px-6 sticky top-0 z-30">
+        <header className="bg-[#FEFAF9]/80 backdrop-blur-sm border-b border-[#FEFAF9] h-16 flex items-center justify-between px-3 sm:px-6 sticky top-0 z-30">
           <div className="flex items-center space-x-4">
             {isMobile && (
               <button
                 onClick={toggleSidebar}
                 className="p-2 rounded-xl hover:bg-[#FEFAF9] transition-colors duration-200"
+                aria-label={sidebarOpen ? t("closeMenu") : t("openMenu")}
+                aria-expanded={sidebarOpen}
               >
                 {sidebarOpen ? (
                   <X className="h-5 w-5 text-[#6B6A6A]" />
@@ -192,13 +195,14 @@ const DashboardLayout = ({ activeMenu, children }) => {
               avatar={user?.avatar || ""}
               companyName={user?.name || ""}
               email={user?.email || ""}
+              userRole={user?.role || ""}
               onLogout={logout}
             />
           </div>
         </header>
 
         {/* Main content area */}
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="flex-1 overflow-auto p-3 sm:p-6">{children}</main>
       </div>
     </div>
   );
