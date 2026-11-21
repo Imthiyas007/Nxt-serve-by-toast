@@ -1,10 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
+import LanguageSwitcher from '../../components/layout/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 const TEXT_MODEL = 'gemini-3.5-flash-lite';
 const TTS_MODEL = 'gemini-3.8-flash-tts';
 
 // Main component for the interview chatbot
 const InterviewPage = () => {
+    const { t, i18n } = useTranslation();
+    const responseLanguage = {
+        'en-US': 'English',
+        es: 'Spanish',
+        zh: 'Chinese',
+        vi: 'Vietnamese',
+        fr: 'French',
+        pt: 'Portuguese',
+        fil: 'Filipino',
+        hi: 'Hindi',
+        ar: 'Arabic',
+        ta: 'Tamil',
+        ko: 'Korean',
+    }[i18n.resolvedLanguage] || 'English';
     // State variables to manage the chatbot's UI and data
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
@@ -24,29 +40,29 @@ const InterviewPage = () => {
 
     // Predefined job roles for a quick start to the interview
     const jobRoles = [
-        { name: 'Host / Hostess', description: 'Greeting and seating guests.' },
-        { name: 'Server / Waiter / Waitress', description: 'Taking orders and providing table service.' },
-        { name: 'Busser / Runner', description: 'Clearing tables and supporting staff.' },
-        { name: 'Bartender', description: 'Preparing drinks and serving customers at the bar.' },
-        { name: 'Barback', description: 'Assisting the bartender with supplies.' },
-        { name: 'Cashier', description: 'Handling transactions and customer payments.' },
-        { name: 'Executive Chef / Head Chef', description: 'Leading and managing the kitchen team.' },
-        { name: 'Sous Chef', description: 'Assisting the head chef and overseeing kitchen operations.' },
-        { name: 'Line Cook', description: 'Preparing dishes on the cooking line.' },
-        { name: 'Prep Cook', description: 'Preparing ingredients and food items.' },
-        { name: 'Pastry Chef / Baker', description: 'Creating desserts, pastries, and baked goods.' },
-        { name: 'Dishwasher', description: 'Cleaning kitchenware and equipment.' },
-        { name: 'Kitchen Porter', description: 'Maintaining kitchen cleanliness and hygiene.' },
-        { name: 'Restaurant Manager', description: 'Overseeing all restaurant operations.' },
-        { name: 'Assistant Manager', description: 'Supporting the manager in daily duties.' },
-        { name: 'Shift Supervisor', description: 'Managing staff and operations during a shift.' },
-        { name: 'Food & Beverage Manager', description: 'Managing all food and beverage services.' },
-        { name: 'Banquet Manager', description: 'Planning and executing banquet events.' },
-        { name: 'Steward', description: 'Handling supplies and maintenance tasks.' },
-        { name: 'Barista', description: 'Preparing and serving coffee-based drinks.' },
-        { name: 'Drive-Thru Operator', description: 'Serving customers through the drive-thru.' },
-        { name: 'Delivery Driver', description: 'Delivering orders to customers.' },
-        { name: 'Expediter (Expo)', description: 'Ensuring orders are accurate and delivered on time.' },
+        { nameKey: 'roleHost', descriptionKey: 'roleHostDescription' },
+        { nameKey: 'roleServer', descriptionKey: 'roleServerDescription' },
+        { nameKey: 'roleBusser', descriptionKey: 'roleBusserDescription' },
+        { nameKey: 'roleBartender', descriptionKey: 'roleBartenderDescription' },
+        { nameKey: 'roleBarback', descriptionKey: 'roleBarbackDescription' },
+        { nameKey: 'roleCashier', descriptionKey: 'roleCashierDescription' },
+        { nameKey: 'roleExecutiveChef', descriptionKey: 'roleExecutiveChefDescription' },
+        { nameKey: 'roleSousChef', descriptionKey: 'roleSousChefDescription' },
+        { nameKey: 'roleLineCook', descriptionKey: 'roleLineCookDescription' },
+        { nameKey: 'rolePrepCook', descriptionKey: 'rolePrepCookDescription' },
+        { nameKey: 'rolePastryChef', descriptionKey: 'rolePastryChefDescription' },
+        { nameKey: 'roleDishwasher', descriptionKey: 'roleDishwasherDescription' },
+        { nameKey: 'roleKitchenPorter', descriptionKey: 'roleKitchenPorterDescription' },
+        { nameKey: 'roleRestaurantManager', descriptionKey: 'roleRestaurantManagerDescription' },
+        { nameKey: 'roleAssistantManager', descriptionKey: 'roleAssistantManagerDescription' },
+        { nameKey: 'roleShiftSupervisor', descriptionKey: 'roleShiftSupervisorDescription' },
+        { nameKey: 'roleFoodBeverageManager', descriptionKey: 'roleFoodBeverageManagerDescription' },
+        { nameKey: 'roleBanquetManager', descriptionKey: 'roleBanquetManagerDescription' },
+        { nameKey: 'roleSteward', descriptionKey: 'roleStewardDescription' },
+        { nameKey: 'roleBarista', descriptionKey: 'roleBaristaDescription' },
+        { nameKey: 'roleDriveThruOperator', descriptionKey: 'roleDriveThruOperatorDescription' },
+        { nameKey: 'roleDeliveryDriver', descriptionKey: 'roleDeliveryDriverDescription' },
+        { nameKey: 'roleExpediter', descriptionKey: 'roleExpediterDescription' },
     ];
 
     // Scrolls to the bottom of the chat window when a new message is added
@@ -65,8 +81,7 @@ const InterviewPage = () => {
     const callGeminiAPI = async (payload, model) => {
         const apiKey = import.meta.env.VITE_GEMINI_API_KEY; // Ensure this is set in your environment variables
         if (!apiKey) {
-            const message = 'Gemini API key is missing. Set VITE_GEMINI_API_KEY and redeploy the frontend.';
-            setApiError(message);
+            setApiError(t("apiKeyMissing"));
             return null;
         }
 
@@ -88,8 +103,8 @@ const InterviewPage = () => {
                     const errorBody = await response.json().catch(() => null);
                     const detail = errorBody?.error?.message;
                     if (response.status === 401) {
-                        setApiError('Authentication Error (401): The API key is likely missing or invalid.');
-                        throw new Error('Authentication Error (401)');
+                        setApiError(t("apiAuthError"));
+                        return null;
                     } else if (response.status === 429) { 
                         const backoffTime = initialBackoff * Math.pow(2, retries);
                         await new Promise(res => setTimeout(res, backoffTime));
@@ -109,14 +124,14 @@ const InterviewPage = () => {
             } catch (error) {
                 console.error('Error fetching from Gemini API:', error);
                 if (error.message.includes('401')) {
-                    setApiError(error.message);
-                    throw error;
+                    setApiError(t("apiAuthError"));
+                    return null;
                 }
-                setApiError(`Failed to get a response: ${error.message}`);
+                setApiError(t("tryAgain"));
                 return null;
             }
         }
-        setApiError('Failed to get a response after multiple retries. Please check your network.');
+        setApiError(t("tryAgain"));
         return null;
     };
     
@@ -210,7 +225,7 @@ const InterviewPage = () => {
         setSelectedJobRole(role);
         setView('interview');
         setIsLoading(true);
-        const prompt = `You are an interviewer for a ${role} position. Your role is to ask one question at a time to the job candidate. Do not provide answers, additional text, or context. Your only output should be the question itself. Start the interview by asking the first question.`;
+        const prompt = `You are an interviewer for a ${role} position. Ask one question at a time. Do not provide answers or extra context. Respond only in ${responseLanguage}. Start with the first question.`;
         
         const payload = {
             contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -218,7 +233,7 @@ const InterviewPage = () => {
         };
         
         const responseText = await callGeminiAPI(payload, TEXT_MODEL);
-        const text = responseText?.candidates?.[0]?.content?.parts?.[0]?.text || 'Failed to get a response.';
+        const text = responseText?.candidates?.[0]?.content?.parts?.[0]?.text || t("tryAgain");
         setMessages([{ sender: 'ai', text }]);
         setIsLoading(false);
     };
@@ -240,7 +255,7 @@ const InterviewPage = () => {
         }));
         chatHistory.push({ role: 'user', parts: [{ text: currentInput }] });
 
-        const evaluationPrompt = `The candidate just said: "${currentInput}". Please provide a brief, professional evaluation of their answer (e.g., "Good answer, you provided a clear example."). Then, ask the next question for a ${selectedJobRole} interview. The entire response must be concise and conversational. Do not provide your own answers or any other text, just the evaluation and the next question.`;
+        const evaluationPrompt = `The candidate just said: "${currentInput}". Give a brief, professional evaluation, then ask the next question for a ${selectedJobRole} interview. Respond only in ${responseLanguage}. Be concise and conversational.`;
         
         const payload = {
             contents: [...chatHistory, { role: "user", parts: [{ text: evaluationPrompt }] }],
@@ -248,7 +263,7 @@ const InterviewPage = () => {
         };
         
         const responseText = await callGeminiAPI(payload, TEXT_MODEL);
-        const text = responseText?.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, I could not generate a response. Please try again.';
+        const text = responseText?.candidates?.[0]?.content?.parts?.[0]?.text || t("tryAgain");
         setMessages(prevMessages => [...prevMessages, { sender: 'ai', text }]);
         setIsLoading(false);
     };
@@ -256,7 +271,7 @@ const InterviewPage = () => {
     // Handles the analysis of the job description
     const handleAnalyzeJobDesc = async () => {
         if (!jobDesc.trim()) {
-            setGeneratedContent({ error: 'Please enter a job description to analyze.' });
+            setGeneratedContent({ error: t("jobDescriptionRequired") });
             setApiError(null);
             return;
         }
@@ -264,7 +279,7 @@ const InterviewPage = () => {
         setGeneratedContent(null);
         setIsLoading(true);
 
-        const prompt = `Analyze the following job description. Extract the most important key skills required for the role, and then generate 5 sample interview questions that a candidate would likely be asked based on this description. Your response must be a JSON object with two keys: "skills" (an array of strings) and "questions" (an array of strings).
+        const prompt = `Analyze the following job description. Extract the most important key skills required for the role, then generate 5 sample interview questions. Respond in ${responseLanguage}. Return a JSON object with two keys: "skills" (an array of strings) and "questions" (an array of strings).
         
         Job Description:
         ${jobDesc}
@@ -302,11 +317,11 @@ const InterviewPage = () => {
                 setApiError(null);
             } catch (e) {
                 console.error("Failed to parse analysis JSON:", e);
-                setGeneratedContent({ error: "Failed to generate analysis. The API response was not valid JSON." });
-                setApiError("The API response for analysis was malformed. Please try again.");
+                setGeneratedContent({ error: t("tryAgain") });
+                setApiError(t("tryAgain"));
             }
         } else {
-            setGeneratedContent({ error: "No analysis could be generated. Please check your internet connection and try again." });
+            setGeneratedContent({ error: t("tryAgain") });
         }
         setIsLoading(false);
     };
@@ -323,7 +338,7 @@ const InterviewPage = () => {
             .join('\n');
 
         // Create a new, structured prompt for a JSON response
-        const prompt = `You are a professional career coach. Your task is to review the following interview transcript for a ${selectedJobRole} position. For each question and answer pair, provide an evaluation, a brief explanation for your feedback, and a suggested, more effective answer. Your response MUST be a JSON array of objects. Each object MUST have the keys "question", "yourAnswer", "evaluation", "explanation", and "suggestedAnswer". DO NOT include any other text, context, or conversational remarks.
+        const prompt = `You are a professional career coach. Review the interview transcript for a ${selectedJobRole} position. For each question and answer, provide an evaluation, explanation, and suggested improved answer in ${responseLanguage}. Return a JSON array of objects with the keys "question", "yourAnswer", "evaluation", "explanation", and "suggestedAnswer". Do not include any other text.
         
         If an answer is too brief to be reviewed, your "evaluation" should be "Needs more detail", your "explanation" should state "Your answer was too brief. Please provide more context and specific examples.", and your "suggestedAnswer" should be "Try again by providing a more comprehensive response to the question."
         
@@ -361,49 +376,25 @@ const InterviewPage = () => {
                 const parsedData = JSON.parse(responseText);
                 // Ensure parsedData is an array
                 if (Array.isArray(parsedData) && parsedData.length > 0) {
-                    // Check if the first item has an evaluation, if not, set a default
                     if (!parsedData[0].evaluation) {
-                        setReviewData([{
-                            question: parsedData[0].question,
-                            yourAnswer: parsedData[0].yourAnswer,
-                            evaluation: 'Needs more detail',
-                            explanation: 'Your answer was too brief. Please provide more context and specific examples.',
-                            suggestedAnswer: 'Try again by providing a more comprehensive response to the question.'
-                        }]);
+                        setReviewData([]);
+                        setApiError(t("reviewUnavailable"));
                     } else {
                         setReviewData(parsedData);
                     }
-                    setApiError(null);
+                    if (parsedData[0].evaluation) setApiError(null);
                 } else {
-                    // Handle case where API returns an empty array
-                    setReviewData([{
-                        question: 'No questions were answered with enough detail.',
-                        yourAnswer: 'Your answers were too brief for a meaningful review.',
-                        evaluation: 'Cannot review',
-                        explanation: 'The AI needs substantial answers to generate a proper evaluation. Try again by providing more detailed responses.',
-                        suggestedAnswer: 'Please try again and provide more specific examples and explanations.'
-                    }]);
+                    setReviewData([]);
+                    setApiError(t("reviewUnavailable"));
                 }
             } catch (e) {
                 console.error("Failed to parse review JSON:", e);
-                setReviewData([{
-                    question: 'Review Generation Failed',
-                    yourAnswer: 'An error occurred while processing the review.',
-                    evaluation: 'Error',
-                    explanation: 'The API returned an invalid response. Please try the interview again.',
-                    suggestedAnswer: 'Try refreshing the page and starting a new interview to resolve the issue.'
-                }]);
-                setApiError("The API response for review was malformed. Please try again.");
+                setReviewData([]);
+                setApiError(t("tryAgain"));
             }
         } else {
-            // Handle case where API response is null or empty
-            setReviewData([{
-                question: 'Review Generation Failed',
-                yourAnswer: 'An error occurred while generating the review.',
-                evaluation: 'Error',
-                explanation: 'The API returned no response. This may be a network issue. Please try again.',
-                suggestedAnswer: 'Check your internet connection and try the interview again.'
-            }]);
+            setReviewData([]);
+            setApiError(t("tryAgain"));
         }
         
         setView('review');
@@ -413,13 +404,13 @@ const InterviewPage = () => {
     // Renders the job description analysis screen
     const renderJobAnalysis = () => (
         <div className="flex flex-col items-center p-6 sm:p-8 md:p-10 space-y-6 h-full overflow-y-auto">
-            <h2 className="text-2xl font-bold text-[#414349] dark:text-[#fbf1ef] text-center">✨ Job Description Analyzer</h2>
+            <h2 className="text-2xl font-bold text-[#414349] dark:text-[#fbf1ef] text-center">✨ {t("jobDescriptionAnalyzer")}</h2>
             <p className="text-center text-sm text-[#7d7c7d] dark:text-[#beaca7]">
-                Paste a job description below, and I'll generate a list of key skills and sample interview questions.
+                {t("analyzerHelp")}
             </p>
             <textarea
                 className="w-full h-40 p-4 text-[#414349] dark:text-[#fbf1ef] bg-[#eeeae8] dark:bg-[#414349] rounded-xl border border-[#c9c5c3] dark:border-[#7d7c7d] focus:outline-none focus:ring-2 focus:ring-[#f25728] resize-none transition-all"
-                placeholder="Paste job description here..."
+                placeholder={t("pasteJobDescription")}
                 value={jobDesc}
                 onChange={(e) => setJobDesc(e.target.value)}
                 disabled={isLoading}
@@ -429,7 +420,7 @@ const InterviewPage = () => {
                 className={`w-full bg-[#f25728] hover:bg-[#f43a02] text-[#fbf1ef] font-bold py-4 px-6 rounded-full shadow-lg transform transition-transform duration-300 hover:scale-[1.01] ${isLoading ? 'bg-[#9c9a99] cursor-not-allowed' : ''}`}
                 disabled={isLoading}
             >
-                {isLoading ? 'Analyzing...' : 'Analyze & Generate Questions ✨'}
+                {isLoading ? t("analyzing") : t("analyzeGenerateQuestions")}
             </button>
 
             {generatedContent && (
@@ -439,7 +430,7 @@ const InterviewPage = () => {
                     ) : (
                         <>
                             <div>
-                                <h3 className="text-lg font-bold text-[#414349] dark:text-[#fbf1ef] mb-2">Key Skills</h3>
+                                <h3 className="text-lg font-bold text-[#414349] dark:text-[#fbf1ef] mb-2">{t("keySkills")}</h3>
                                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[#7d7c7d] dark:text-[#beaca7]">
                                     {generatedContent.skills.map((skill, index) => (
                                         <li key={index} className="flex items-center space-x-2">
@@ -450,7 +441,7 @@ const InterviewPage = () => {
                                 </ul>
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-[#414349] dark:text-[#fbf1ef] mb-2">Sample Questions</h3>
+                                <h3 className="text-lg font-bold text-[#414349] dark:text-[#fbf1ef] mb-2">{t("sampleQuestions")}</h3>
                                 <ul className="list-decimal list-inside text-[#7d7c7d] dark:text-[#beaca7] space-y-2">
                                     {generatedContent.questions.map((q, index) => (
                                         <li key={index}>{q}</li>
@@ -467,19 +458,19 @@ const InterviewPage = () => {
     // Renders the role selection screen
     const renderRoleSelection = () => (
         <div className="flex flex-col items-center p-6 sm:p-8 space-y-8 h-full overflow-y-auto">
-            <h2 className="text-2xl font-bold text-[#414349] dark:text-[#fbf1ef] text-center">Select an Interview Role</h2>
+            <h2 className="text-2xl font-bold text-[#414349] dark:text-[#fbf1ef] text-center">{t("selectInterviewRole")}</h2>
             <p className="text-center text-sm text-[#7d7c7d] dark:text-[#beaca7]">
-                Choose a role to begin a mock interview tailored to that position.
+                {t("chooseRoleHelp")}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-4xl overflow-y-auto">
                 {jobRoles.map((role) => (
                     <button
-                        key={role.name}
-                        onClick={() => handleStartInterview(role.name)}
+                        key={role.nameKey}
+                        onClick={() => handleStartInterview(t(role.nameKey))}
                         className="flex flex-col items-center justify-center p-5 bg-[#f5f1ef] dark:bg-[#414349] rounded-xl shadow-md transition-all hover:bg-[#eeeae8] dark:hover:bg-[#7d7c7d] transform hover:scale-[1.02]"
                     >
-                        <span className="text-lg font-semibold text-[#414349] dark:text-[#fbf1ef]">{role.name}</span>
-                        <span className="text-xs text-[#7d7c7d] dark:text-[#beaca7] text-center mt-2">{role.description}</span>
+                        <span className="text-lg font-semibold text-[#414349] dark:text-[#fbf1ef]">{t(role.nameKey)}</span>
+                        <span className="text-xs text-[#7d7c7d] dark:text-[#beaca7] text-center mt-2">{t(role.descriptionKey)}</span>
                     </button>
                 ))}
             </div>
@@ -501,7 +492,7 @@ const InterviewPage = () => {
                                     onClick={() => handleSpeakMessage(msg.text)}
                                     className="mx-2 text-[#7d7c7d] dark:text-[#beaca7] hover:text-[#f25728] transition-colors disabled:opacity-50"
                                     disabled={isTtsLoading}
-                                    aria-label="Speak message"
+                                    aria-label={t("speakMessage")}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={`w-5 h-5 ${isTtsLoading ? 'animate-pulse' : ''}`}>
                                         <path d="M13.5 4.5a1.5 1.5 0 0 0-3 0V5.5c-4.478.486-7.942 2.502-9.467 5.753a1.47 1.47 0 0 0-.251 1.05c.18 1.157.653 2.193 1.348 3.05a.755.755 0 0 0 .546.222H6a.75.75 0 0 1 .75.75v3.253a.75.75 0 0 1-1.5 0v-2.695H3.14a.763.763 0 0 0-.546.221c-.7.857-1.173 1.893-1.348 3.05a1.47 1.47 0 0 0 .252 1.051C3.109 21.054 6.573 23.07 11 23.586V22.5a1.5 1.5 0 0 0 3 0v1.086c4.427-.516 7.891-2.532 9.468-5.783a1.47 1.47 0 0 0-.252-1.05c-.695-.857-1.168-1.893-1.348-3.05a.763.763 0 0 0-.546-.221H18a.75.75 0 0 1-.75-.75V8.25a.75.75 0 0 1 1.5 0V9.695h1.36a.755.755 0 0 0 .546-.221c.695-.857 1.168-1.893 1.348-3.05a1.47 1.47 0 0 0-.252-1.051C20.891 3.946 17.427 1.93 13.5 1.414V4.5z" />
@@ -546,7 +537,7 @@ const InterviewPage = () => {
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder="Type your answer here..."
+                        placeholder={t("typeAnswerHere")}
                         className="flex-1 p-4 border border-[#c9c5c3] dark:border-[#7d7c7d] rounded-full focus:outline-none focus:ring-2 focus:ring-[#f25728] dark:bg-[#7d7c7d] dark:text-[#fbf1ef]"
                         disabled={isLoading}
                     />
@@ -557,16 +548,16 @@ const InterviewPage = () => {
                                 ${isLoading ? 'bg-[#9c9a99] cursor-not-allowed' : 'bg-[#f25728] hover:bg-[#f43a02]'}`}
                             disabled={isLoading}
                         >
-                            Send
+                            {t("send")}
                         </button>
                     </div>
                 </form>
                 <div className="flex flex-col sm:flex-row justify-between items-center mt-6 text-sm space-y-3 sm:space-y-0">
                     <button onClick={() => setView('roleSelection')} className="text-[#7d7c7d] hover:text-[#f25728] transition-colors font-medium">
-                        Start a New Interview
+                        {t("startNewInterview")}
                     </button>
                     <button onClick={handleEndInterview} className="px-6 py-3 bg-[#f43a02] text-[#fbf1ef] rounded-full font-bold shadow-lg hover:bg-[#f25728] transition-transform duration-300 transform hover:scale-[1.02]">
-                        End Interview & Get Review
+                        {t("endInterviewReview")}
                     </button>
                 </div>
             </div>
@@ -576,9 +567,9 @@ const InterviewPage = () => {
     // Renders the review screen with feedback and suggestions
     const renderReview = () => (
         <div className="flex flex-col p-6 sm:p-8 space-y-6 overflow-y-auto">
-            <h2 className="text-2xl font-bold text-[#414349] dark:text-[#fbf1ef] text-center">Interview Review</h2>
+            <h2 className="text-2xl font-bold text-[#414349] dark:text-[#fbf1ef] text-center">{t("interviewReview")}</h2>
             <p className="text-center text-sm text-[#7d7c7d] dark:text-[#beaca7]">
-                Here is a detailed breakdown of your interview performance for the <strong className="font-semibold text-[#f25728]">{selectedJobRole}</strong> role.
+                {t("reviewIntro", { role: selectedJobRole })}
             </p>
 
             {reviewData && reviewData.length > 0 ? (
@@ -589,32 +580,32 @@ const InterviewPage = () => {
                         ) : (
                             <>
                                 <div className="space-y-2">
-                                    <h3 className="text-lg font-bold text-[#414349] dark:text-[#fbf1ef]">Question</h3>
-                                    <p className="text-base text-[#7d7c7d] dark:text-[#beaca7] italic leading-snug">"{item.question || 'N/A'}"</p>
+                                    <h3 className="text-lg font-bold text-[#414349] dark:text-[#fbf1ef]">{t("question")}</h3>
+                                    <p className="text-base text-[#7d7c7d] dark:text-[#beaca7] italic leading-snug">"{item.question || t("notAvailable")}"</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-lg font-bold text-[#414349] dark:text-[#fbf1ef]">Your Answer</h3>
-                                    <p className="text-base text-[#7d7c7d] dark:text-[#beaca7] leading-snug">"{item.yourAnswer || 'No answer provided'}"</p>
+                                    <h3 className="text-lg font-bold text-[#414349] dark:text-[#fbf1ef]">{t("yourAnswer")}</h3>
+                                    <p className="text-base text-[#7d7c7d] dark:text-[#beaca7] leading-snug">"{item.yourAnswer || t("noAnswerProvided")}"</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-lg font-bold text-[#414349] dark:text-[#fbf1ef]">Evaluation</h3>
-                                    <p className="text-base text-[#7d7c7d] dark:text-[#beaca7] font-semibold leading-snug">{item.evaluation || 'No evaluation available'}</p>
-                                    <p className="text-sm text-[#7d7c7d] dark:text-[#beaca7] leading-relaxed">{item.explanation || 'No explanation available.'}</p>
+                                    <h3 className="text-lg font-bold text-[#414349] dark:text-[#fbf1ef]">{t("evaluation")}</h3>
+                                    <p className="text-base text-[#7d7c7d] dark:text-[#beaca7] font-semibold leading-snug">{item.evaluation || t("noEvaluationAvailable")}</p>
+                                    <p className="text-sm text-[#7d7c7d] dark:text-[#beaca7] leading-relaxed">{item.explanation || t("noExplanationAvailable")}</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-lg font-bold text-[#414349] dark:text-[#fbf1ef]">Suggested Answer</h3>
-                                    <p className="text-base text-[#7d7c7d] dark:text-[#beaca7] italic leading-relaxed">"{item.suggestedAnswer || 'N/A'}"</p>
+                                    <h3 className="text-lg font-bold text-[#414349] dark:text-[#fbf1ef]">{t("suggestedAnswer")}</h3>
+                                    <p className="text-base text-[#7d7c7d] dark:text-[#beaca7] italic leading-relaxed">"{item.suggestedAnswer || t("notAvailable")}"</p>
                                 </div>
                             </>
                         )}
                     </div>
                 ))
             ) : (
-                <p className="text-[#f43a02] text-center">Failed to load review data. Please try the interview again.</p>
+                <p className="text-[#f43a02] text-center">{apiError || t("reviewLoadFailure")}</p>
             )}
 
             <button onClick={() => setView('roleSelection')} className="mt-6 w-full bg-[#f25728] hover:bg-[#f43a02] text-[#fbf1ef] font-bold py-4 px-6 rounded-full shadow-lg transition-transform duration-300 transform hover:scale-[1.02]">
-                Start a New Interview
+                {t("startNewInterview")}
             </button>
         </div>
     );
@@ -625,25 +616,28 @@ const InterviewPage = () => {
                 
                 {/* Header with navigation */}
                 <div className="p-4 sm:p-6 bg-[#f5f1ef] dark:bg-[#7d7c7d] rounded-t-2xl border-b border-[#c9c5c3] dark:border-[#beaca7] flex flex-col items-center">
-                    <h1 className="text-2xl font-bold text-[#414349] dark:text-[#fbf1ef] text-center">AI Interview Prep</h1>
+                    <h1 className="text-2xl font-bold text-[#414349] dark:text-[#fbf1ef] text-center">{t("aiInterviewPrep")}</h1>
+                    <div className="mt-3">
+                        <LanguageSwitcher />
+                    </div>
                     <div className="flex justify-center space-x-2 sm:space-x-4 mt-4 bg-[#eeeae8] dark:bg-[#414349] p-1 rounded-full shadow-inner">
                         <button 
                             onClick={() => { setView('jobAnalysis'); setMessages([]); setSelectedJobRole(null); }}
                             className={`py-2 px-4 rounded-full text-sm font-medium transition-all duration-300 ${view === 'jobAnalysis' ? 'bg-[#f25728] text-[#fbf1ef] shadow-md' : 'text-[#7d7c7d] dark:text-[#beaca7] hover:bg-white/50 dark:hover:bg-[#414349]'}`}
                         >
-                            Job Analysis
+                            {t("jobAnalysis")}
                         </button>
                         <button 
                             onClick={() => { setView('roleSelection'); setMessages([]); setSelectedJobRole(null); }}
                             className={`py-2 px-4 rounded-full text-sm font-medium transition-all duration-300 ${view === 'roleSelection' || view === 'interview' || view === 'review' ? 'bg-[#f25728] text-[#fbf1ef] shadow-md' : 'text-[#7d7c7d] dark:text-[#beaca7] hover:bg-white/50 dark:hover:bg-[#414349]'}`}
                         >
-                            Interview Chat
+                            {t("interviewChat")}
                         </button>
                     </div>
                 </div>
 
                 {/* Dynamic content based on the current view state */}
-                {apiError && view !== 'interview' && (
+                {apiError && view !== 'interview' && view !== 'review' && (
                     <div className="mx-6 mt-4 rounded-xl bg-red-500 p-3 text-center text-sm font-medium text-white shadow-md" role="alert">
                         {apiError}
                     </div>

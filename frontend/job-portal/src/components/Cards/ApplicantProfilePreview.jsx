@@ -1,13 +1,19 @@
 import { Download, X } from "lucide-react";
 import { useState } from "react";
 import { getInitials } from "../../utils/helper";
-import moment from "moment";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import toast from "react-hot-toast";
 
 import StatusBadge from "../StatusBadge";
+import { useTranslation } from "react-i18next";
 const statusOptions = ["Applied", "In Review", "Rejected", "Accepted"];
+const statusTranslationKeys = {
+  Applied: "applicationApplied",
+  "In Review": "applicationInReview",
+  Rejected: "applicationRejected",
+  Accepted: "applicationAccepted",
+};
 
 const ApplicantProfilePreview = ({
   selectedApplicant,
@@ -15,6 +21,7 @@ const ApplicantProfilePreview = ({
   handleDownloadResume,
   handleClose,
 }) => {
+  const { t, i18n } = useTranslation();
   const [currentStatus, setCurrentStatus] = useState(selectedApplicant.status);
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +38,7 @@ const ApplicantProfilePreview = ({
 
       if (response.status === 200) {
         setSelectedApplicant({ ...selectedApplicant, status: newStatus });
-        toast.success("Application status updated successfully");
+        toast.success(t("applicationStatusUpdated"));
       }
     } catch (err) {
       console.error("Error updating status:", err);
@@ -47,7 +54,7 @@ const ApplicantProfilePreview = ({
         {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#FEFAF9]">
           <h3 className="text-lg font-semibold text-[#2A2A2A]">
-            Applicant Profile
+            {t("applicantProfile")}
           </h3>
           <button
             onClick={() => handleClose()}
@@ -82,27 +89,27 @@ const ApplicantProfilePreview = ({
           <div className="space-y-4">
             <div className="bg-[#FEFAF9] rounded-lg p-4">
               <h5 className="font-medium text-[#2A2A2A] mb-2">
-                Applied Position
+                {t("appliedPosition")}
               </h5>
               <p className="text-[#6B6A6A]">{selectedApplicant.job.title}</p>
               <p className="text-[#6B6A6A] text-sm mt-1">
-                {selectedApplicant.job.location} • {selectedApplicant.job.type}
+                {selectedApplicant.job.location} • {selectedApplicant.job.type && t(selectedApplicant.job.type === "Full-Time" ? "fullTime" : selectedApplicant.job.type === "Part-Time" ? "partTime" : selectedApplicant.job.type.toLowerCase())}
               </p>
             </div>
 
             <div className="bg-[#FEFAF9] rounded-lg p-4">
               <h5 className="font-medium text-[#2A2A2A] mb-2">
-                Application Details
+                {t("applicationDetails")}
               </h5>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-[#6B6A6A]">Status:</span>
+                  <span className="text-[#6B6A6A]">{t("statusLabel")}</span>
                   <StatusBadge status={currentStatus} />
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#6B6A6A]">Applied Date:</span>
+                  <span className="text-[#6B6A6A]">{t("appliedDate")}</span>
                   <span className="text-[#2A2A2A]">
-                    {moment(selectedApplicant.createdAt)?.format("Do MM YYYY")}
+                    {new Intl.DateTimeFormat(i18n.resolvedLanguage, { dateStyle: "medium" }).format(new Date(selectedApplicant.createdAt))}
                   </span>
                 </div>
               </div>
@@ -115,13 +122,13 @@ const ApplicantProfilePreview = ({
               className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#EB611F] text-white font-medium rounded-lg hover:bg-[#EB611F] transition-colors"
             >
               <Download className="h-4 w-4" />
-              Download Resume
+              {t("downloadResume")}
             </button>
 
             {/* Status Dropdown */}
             <div className="mt-4">
               <label className="block mb-1 text-sm text-[#6B6A6A] font-medium">
-                Change Application Status
+                {t("changeApplicationStatus")}
               </label>
               <select
                 value={currentStatus}
@@ -131,12 +138,12 @@ const ApplicantProfilePreview = ({
               >
                 {statusOptions.map((status) => (
                   <option key={status} value={status}>
-                    {status}
+                    {t(statusTranslationKeys[status])}
                   </option>
                 ))}
               </select>
               {loading && (
-                <p className="text-xs text-[#6B6A6A] mt-1">Updating status...</p>
+                <p className="text-xs text-[#6B6A6A] mt-1">{t("updatingStatus")}</p>
               )}
             </div>
           </div>

@@ -88,8 +88,8 @@ const Footer = () => {
         <div className="space-y-2">
           <h4 className="font-semibold text-[#22252D] mb-2">{t("contact")}</h4>
           <p className="text-[#676664]">support@nexserve.com</p>
-          <p className="text-[#676664]">Sales: (857)301-6002</p>
-          <p className="text-[#676664]">Customer Care: (617)682-0225</p>
+          <p className="text-[#676664]">{t("salesLabel")} (857)301-6002</p>
+          <p className="text-[#676664]">{t("customerCareLabel")} (617)682-0225</p>
           <p className="text-[#676664]">333, Summer Street, Boston, MA-02210</p>
         </div>
       </div>

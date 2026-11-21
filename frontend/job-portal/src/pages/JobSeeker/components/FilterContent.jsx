@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { CATEGORIES, JOB_TYPES } from "../../../utils/data";
 import SalaryRangeSlider from "../../../components/Input/SalaryRangeSlider";
+import { useTranslation } from "react-i18next";
 
 const FilterSection = ({ title, children, isExpanded, onToggle }) => (
   <div className="border-b border-[#FEFAF9] pb-4 mb-4 last:border-b-0">
@@ -26,6 +27,8 @@ const FilterContent = ({
   filters,
   handleFilterChange,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <>
       <div className="flex items-center justify-between mb-6">
@@ -33,12 +36,12 @@ const FilterContent = ({
           onClick={clearAllFilters}
           className="text-[#EB611F] hover:text-[#d4551b] font-semibold text-sm"
         >
-          Clear All
+          {t("clearAll")}
         </button>
       </div>
 
       <FilterSection
-        title="Job Type"
+        title={t("jobType")}
         isExpanded={expandedSections?.jobType}
         onToggle={() => toggleSection("jobType")}
       >
@@ -60,7 +63,13 @@ const FilterContent = ({
                 }
               />
               <span className="ml-3 text-[#2A2A2A] font-medium">
-                {type.value}
+                {t(
+                  type.value === "Full-Time"
+                    ? "fullTime"
+                    : type.value === "Part-Time"
+                      ? "partTime"
+                      : type.value.toLowerCase()
+                )}
               </span>
             </label>
           ))}
@@ -68,7 +77,7 @@ const FilterContent = ({
       </FilterSection>
 
       <FilterSection
-        title="Salary Range"
+        title={t("salaryRange")}
         isExpanded={expandedSections.salary}
         onToggle={() => toggleSection("salary")}
       >
@@ -79,7 +88,7 @@ const FilterContent = ({
       </FilterSection>
 
       <FilterSection
-        title="Category"
+        title={t("category")}
         isExpanded={expandedSections?.categories}
         onToggle={() => toggleSection("categories")}
       >
@@ -101,7 +110,7 @@ const FilterContent = ({
                 }
               />
               <span className="ml-3 text-[#2A2A2A] font-medium">
-                {type.value}
+                {t(type.value.toLowerCase())}
               </span>
             </label>
           ))}

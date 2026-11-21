@@ -1,34 +1,34 @@
 // Validation functions
-export const validateEmail = (email) => {
-  if (!email.trim()) return "Email is required";
+export const validateEmail = (email, t) => {
+  if (!email.trim()) return t("emailRequired");
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) return "Please enter a valid email address";
+  if (!emailRegex.test(email)) return t("invalidEmail");
   return "";
 };
 
-export const validatePassword = (password) => {
-  if (!password) return "Password is required";
-  if (password.length < 8) return "Password must be at least 8 characters";
+export const validatePassword = (password, t) => {
+  if (!password) return t("passwordRequired");
+  if (password.length < 8) return t("passwordTooShort");
   if (!/(?=.*[a-z])/.test(password))
-    return "Password must contain at least one lowercase letter";
+    return t("passwordNeedsLowercase");
   if (!/(?=.*[A-Z])/.test(password))
-    return "Password must contain at least one uppercase letter";
+    return t("passwordNeedsUppercase");
   if (!/(?=.*\d)/.test(password))
-    return "Password must contain at least one number";
+    return t("passwordNeedsNumber");
   return "";
 };
 
-export const validateAvatar = (file) => {
+export const validateAvatar = (file, t) => {
   if (!file) return ""; // Avatar is optional
 
   const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
   if (!allowedTypes.includes(file.type)) {
-    return "Avatar must be a JPG or PNG file";
+    return t("avatarMustBeImage");
   }
 
   const maxSize = 5 * 1024 * 1024; // 5MB
   if (file.size > maxSize) {
-    return "Avatar must be less than 5MB";
+    return t("avatarTooLarge");
   }
 
   return "";

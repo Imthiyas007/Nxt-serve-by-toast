@@ -8,9 +8,11 @@ import uploadImage from "../../utils/uploadImage";
 
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import EditProfileDetails from "./EditProfileDetails";
+import { useTranslation } from "react-i18next";
 
 const EmployerProfilePage = () => {
   const { user, updateUser } = useAuth();
+  const { t } = useTranslation();
 
   const [profileData, setProfileData] = useState({
     name: user?.name || "",
@@ -69,7 +71,7 @@ const EmployerProfilePage = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Profile Details Updated Successfully!!");
+        toast.success(t("profileUpdated"));
         setProfileData({ ...formData });
         updateUser({ ...formData });
         setEditMode(false);
@@ -122,14 +124,14 @@ const EmployerProfilePage = () => {
               {/* Header */}
               <div className="bg-[#EB611F] px-8 py-6 flex justify-between items-center">
                 <h1 className="text-xl font-medium text-white">
-                  Employer Profile
+                  {t("employerProfile")}
                 </h1>
                 <button
                   onClick={() => setEditMode(true)}
                   className="bg-white/10 hover:bg-[#FEFAF9] hover:text-[#2A2A2A] text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
                 >
                   <Edit3 className="w-4 h-4" />
-                  <span>Edit Profile</span>
+                  <span>{t("editProfile")}</span>
                 </button>
               </div>
 
@@ -139,13 +141,13 @@ const EmployerProfilePage = () => {
                   {/* Personal Information */}
                   <div className="space-y-6">
                     <h2 className="text-lg font-semibold text-[#2A2A2A] border-b border-[#FEFAF9] pb-2">
-                      Personal Information
+                      {t("personalInformation")}
                     </h2>
 
                     <div className="flex items-center space-x-4">
                       <img
                         src={profileData.avatar}
-                        alt="Avatar"
+                        alt={t("chooseAvatar")}
                         className="w-20 h-20 rounded-full object-cover border-4 border-[#FEFAF9]"
                       />
                       <div>
@@ -163,13 +165,13 @@ const EmployerProfilePage = () => {
                   {/* Company Information */}
                   <div className="space-y-6">
                     <h2 className="text-lg font-semibold text-[#2A2A2A] border-b border-[#FEFAF9] pb-2">
-                      Company Information
+                      {t("companyInformation")}
                     </h2>
 
                     <div className="flex items-center space-x-4">
                       <img
                         src={profileData.companyLogo}
-                        alt="Company Logo"
+                        alt={t("companyLogo")}
                         className="w-20 h-20 rounded-lg object-cover border-4 border-[#FEFAF9]"
                       />
                       <div>
@@ -178,7 +180,7 @@ const EmployerProfilePage = () => {
                         </h3>
                         <div className="flex items-center text-sm text-[#6B6A6A] mt-1">
                           <Building2 className="w-4 h-4 mr-2" />
-                          <span>Company</span>
+                          <span>{t("companyLabel")}</span>
                         </div>
                       </div>
                     </div>
@@ -188,7 +190,7 @@ const EmployerProfilePage = () => {
                 {/* Company Description */}
                 <div className="mt-8">
                   <h2 className="text-lg font-semibold text-[#2A2A2A] border-b border-[#FEFAF9] pb-2 mb-6">
-                    About Company
+                    {t("aboutCompany")}
                   </h2>
                   <p className="text-sm text-[#6B6A6A] leading-relaxed bg-[#FEFAF9] p-6 rounded-lg">
                     {profileData.companyDescription}

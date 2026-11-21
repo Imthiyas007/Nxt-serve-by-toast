@@ -8,9 +8,11 @@ import {
 } from "lucide-react";
 import { CATEGORIES, JOB_TYPES } from "../../utils/data";
 import { useAuth } from "../../context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const JobPostingPreview = ({ formData, setIsPreview }) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const currencies = [{ value: "usd", label: "$" }];
 
   return (
@@ -20,7 +22,7 @@ const JobPostingPreview = ({ formData, setIsPreview }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <h2 className="text-lg md:text-xl font-bold text-[#2A2A2A]">
-                Job Preview
+                {t("preview")}
               </h2>
             </div>
             <button
@@ -28,7 +30,7 @@ const JobPostingPreview = ({ formData, setIsPreview }) => {
               className="group flex items-center space-x-2 px-6 py-3 text-xs md:text-sm font-medium text-[#6B6A6A] hover:text-[#2A2A2A] bg-[#FEFAF9] hover:bg-[#FEFAF9] border border-[#FEFAF9] hover:border-transparent rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-              <span>Back to Edit</span>
+              <span>{t("backToEdit")}</span>
             </button>
           </div>
 
@@ -60,7 +62,7 @@ const JobPostingPreview = ({ formData, setIsPreview }) => {
                   {user?.companyLogo ? (
                     <img
                       src={user.companyLogo}
-                      alt="Company Logo"
+                      alt={t("companyLogo")}
                       className="h-16 md:h-20 w-16 md:w-20 object-cover rounded-2xl border-4 border-[#FEFAF9] shadow-lg"
                     />
                   ) : (
@@ -73,16 +75,21 @@ const JobPostingPreview = ({ formData, setIsPreview }) => {
                 <div className="flex flex-wrap gap-3 mt-6 md:mt-0">
                   <span className="px-4 py-2 bg-[#FEFAF9] text-sm text-[#2A2A2A] font-semibold rounded-full border border-[#FEFAF9]">
                     {
-                      CATEGORIES.find((c) => c.value === formData.category)
-                        ?.label
+                      formData.category && t(formData.category.toLowerCase())
                     }
                   </span>
                   <span className="px-4 py-2 text-sm bg-[#FEFAF9] text-[#6B6A6A] font-semibold rounded-full border border-[#FEFAF9]">
-                    {JOB_TYPES.find((j) => j.value === formData.jobType)?.label}
+                    {formData.jobType && t(
+                      formData.jobType === "Full-Time"
+                        ? "fullTime"
+                        : formData.jobType === "Part-Time"
+                          ? "partTime"
+                          : formData.jobType.toLowerCase()
+                    )}
                   </span>
                   <div className="flex items-center space-x-1 px-4 py-2 bg-[#FEFAF9] text-sm text-[#6B6A6A] font-semibold rounded-full border border-[#FEFAF9]">
                     <Clock className="h-4 w-4" />
-                    <span>Posted today</span>
+                    <span>{t("postedToday")}</span>
                   </div>
                 </div>
               </div>
@@ -99,7 +106,7 @@ const JobPostingPreview = ({ formData, setIsPreview }) => {
                       </div>
                       <div>
                         <h3 className="text-sm font-semibold text-[#2A2A2A] mb-1">
-                          Compensation
+                          {t("compensation")}
                         </h3>
                         <div className="text-sm md:text-lg font-bold text-[#2A2A2A]">
                           {
@@ -115,14 +122,14 @@ const JobPostingPreview = ({ formData, setIsPreview }) => {
                           }
                           {Number(formData.salaryMax).toLocaleString()}
                           <span className="text-sm md:text-lg text-[#6B6A6A] font-normal ml-1">
-                            per year
+                            {t("perYear")}
                           </span>
                         </div>
                       </div>
                     </div>
                     <div className="hidden md:flex items-center space-x-2 text-sm text-[#6B6A6A] bg-[#FEFAF9] px-3 py-1 rounded-full">
                       <Users className="h-4 w-4" />
-                      <span>Competitive</span>
+                      <span>{t("competitive")}</span>
                     </div>
                   </div>
                 </div>
@@ -131,7 +138,7 @@ const JobPostingPreview = ({ formData, setIsPreview }) => {
               <div className="space-y-4">
                 <h3 className="text-2xl font-bold text-[#2A2A2A] flex items-center space-x-3">
                   <div className="w-1 h-8 bg-[#EB611F] rounded-full"></div>
-                  <span className="text-base md:text-lg">About This Role</span>
+                  <span className="text-base md:text-lg">{t("aboutRole")}</span>
                 </h3>
                 <div className="bg-[#FEFAF9] border border-[#FEFAF9] rounded-xl p-6">
                   <div className="text-sm text-[#6B6A6A] leading-relaxed whitespace-pre-wrap">
@@ -143,7 +150,7 @@ const JobPostingPreview = ({ formData, setIsPreview }) => {
               <div className="space-y-4">
                 <h3 className="text-2xl font-bold text-[#2A2A2A] flex items-center space-x-3">
                   <div className="w-1 h-8 bg-[#EB611F] rounded-full"></div>
-                  <span className="text-base md:text-lg">What We're Looking For</span>
+                  <span className="text-base md:text-lg">{t("whatLookingFor")}</span>
                 </h3>
                 <div className="bg-[#FEFAF9] border border-[#FEFAF9] rounded-xl p-6">
                   <div className="text-sm text-[#6B6A6A] leading-relaxed whitespace-pre-wrap">

@@ -73,6 +73,24 @@
   "smartDashboard": "Smart Dashboard",
   "smartDashboardDesc": "Track applicants, shortlists & interviews.",
   "fasterHiring": "Faster Hiring",
-  "fasterHiringDesc": "Reduce time-to-hire by 60% with automation."
+  "fasterHiringDesc": "Reduce time-to-hire by 60% with automation.",
+  "language": "Language",
+  "selectLanguage": "Select language",
+  "loginSuccess": "You have been successfully logged in.",
+  "redirectingDashboard": "Redirecting to your dashboard...",
+  "welcomeBack": "Welcome Back",
+  "signInToAccount": "Sign in to your",
+  "enterYourPassword": "Enter your password",
+  "signingIn": "Signing In...",
+  "signIn": "Sign In",
+  "dontHaveAccount": "Don't have an account?",
+  "accountCreated": "Account Created!",
+  "registrationSuccess": "Your account has been successfully created.",
+  "enterFullName": "Enter your full name",
+  "creatingAccount": "Creating Account...",
+  "logout": "Log out",
+  "viewProfile": "View profile",
+  "signOut": "Sign out",
+  "dashboardSubtitle": "Here's what's happening with your jobs today."
 }
 

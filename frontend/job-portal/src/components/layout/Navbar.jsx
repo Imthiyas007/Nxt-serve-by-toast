@@ -3,9 +3,12 @@ import { Briefcase, Bookmark } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import ProfileDropdown from "./ProfileDropdown";
+import LanguageSwitcher from "./LanguageSwitcher";
 import logo from "../../assets/nxtserve-logo.png";
+import { useTranslation } from "react-i18next";
 
 const Navbar = () => {
+  const { t } = useTranslation();
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -34,10 +37,12 @@ const Navbar = () => {
 
           {/* Auth Buttons */}
           <div className="flex items-center space-x-3">
+            <LanguageSwitcher />
             {user && (
               <button
                 className="p-2 rounded-xl hover:bg-[#FEFAF9] transition-colors duration-200 relative"
                 onClick={() => navigate("/saved-jobs")}
+                aria-label={t("savedJobs")}
               >
                 <Bookmark className="h-5 w-5 text-[#6B6A6A]" />
               </button>
@@ -62,13 +67,13 @@ const Navbar = () => {
                   href="/login"
                   className="text-[#6B6A6A] hover:text-[#2A2A2A] transition-colors font-medium px-4 py-2 rounded-lg hover:bg-[#FEFAF9]"
                 >
-                  Login
+                  {t("login")}
                 </a>
                 <a
                   href="/signup"
                   className="bg-[#EB611F] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#EB611F]/90 transition-all duration-300 shadow-sm hover:shadow-md"
                 >
-                  Sign Up
+                  {t("signup")}
                 </a>
               </>
             )}

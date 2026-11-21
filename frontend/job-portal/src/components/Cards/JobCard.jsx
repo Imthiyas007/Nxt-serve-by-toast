@@ -2,11 +2,13 @@ import { Bookmark, Building, Building2, Calendar, MapPin } from "lucide-react";
 import moment from "moment";
 import { useAuth } from "../../context/AuthContext";
 import StatusBadge from "../StatusBadge";
+import { useTranslation } from "react-i18next";
 
 const JobCard = ({ job, onClick, onToggleSave, onApply, saved, hideApply }) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
-  const formatSalary = (min, max) => {
+  const formatSalary = (min) => {
     const formatNumber = (num) => {
       if (num >= 1000) return `$${(num / 1000).toFixed(0)}k`;
       return `$${num}`;
@@ -24,7 +26,7 @@ const JobCard = ({ job, onClick, onToggleSave, onApply, saved, hideApply }) => {
           {job?.company?.companyLogo ? (
             <img
               src={job?.company?.companyLogo}
-              alt="Company Logo"
+              alt={t("companyLogo")}
               className="w-14 h-14 object-cover rounded-2xl border-4 border-white/20 shadow-lg"
             />
           ) : (
@@ -46,6 +48,7 @@ const JobCard = ({ job, onClick, onToggleSave, onApply, saved, hideApply }) => {
         {user && (
           <button
             className="p-2 hover:bg-[#FEFAF9] rounded-xl transition-colors"
+            aria-label={t(job?.isSaved || saved ? "removeSavedJob" : "saveJob")}
             onClick={(e) => {
               e.stopPropagation();
               onToggleSave();
@@ -77,10 +80,16 @@ const JobCard = ({ job, onClick, onToggleSave, onApply, saved, hideApply }) => {
                 : "bg-[#FEFAF9] text-[#6B6A6A]"
             }`}
           >
-            {job?.type}
+            {job?.type && t(
+              job?.type === "Full-Time"
+                ? "fullTime"
+                : job?.type === "Part-Time"
+                  ? "partTime"
+                  : job?.type?.toLowerCase()
+            )}
           </span>
           <span className="flex items-center gap-1.5 bg-[#FEFAF9] text-[#6B6A6A] px-3 py-1 rounded-full font-medium">
-            {job?.category}
+            {job?.category && t(job.category.toLowerCase())}
           </span>
         </div>
       </div>
@@ -98,7 +107,7 @@ const JobCard = ({ job, onClick, onToggleSave, onApply, saved, hideApply }) => {
 
       <div className="flex items-center justify-between">
         <div className="text-[#EB611F] font-semibold text-lg">
-          {formatSalary(job?.salaryMin, job?.salaryMax)}
+          {formatSalary(job?.salaryMin)}
         </div>
         {!saved && (
           <>
@@ -113,7 +122,7 @@ const JobCard = ({ job, onClick, onToggleSave, onApply, saved, hideApply }) => {
                     onApply();
                   }}
                 >
-                  Apply Now
+                  {t("applyNow")}
                 </button>
               )
             )}

@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const SalaryRangeSlider = ({ filters, handleFilterChange }) => {
+  const { t } = useTranslation();
   const [minSalary, setMinSalary] = useState(filters?.minSalary || 0);
   const [maxSalary, setMaxSalary] = useState(filters?.maxSalary || 0);
 
@@ -9,7 +11,7 @@ const SalaryRangeSlider = ({ filters, handleFilterChange }) => {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-            Min Salary
+            {t("minSalary")}
           </label>
           <input
             type="number"
@@ -30,11 +32,11 @@ const SalaryRangeSlider = ({ filters, handleFilterChange }) => {
 
         <div>
           <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-            Max Salary
+            {t("maxSalary")}
           </label>
           <input
             type="number"
-            placeholder="No limit"
+            placeholder={t("noLimit")}
             min="0"
             step="1000"
             className="w-full px-3 py-2 border border-[#FEFAF9] rounded-md shadow-sm focus:border-[#EB611F] focus:ring focus:ring-[#EB611F] focus:ring-opacity-50 text-[#2A2A2A] bg-[#FEFAF9]"
@@ -52,8 +54,8 @@ const SalaryRangeSlider = ({ filters, handleFilterChange }) => {
 
       {(minSalary || maxSalary) && (
         <div className="text-sm text-[#6B6A6A] bg-[#FEFAF9] px-3 py-2 rounded">
-          Range: {minSalary ? `$${minSalary.toLocaleString()}` : "$0"} –{" "}
-          {maxSalary ? `$${maxSalary.toLocaleString()}` : "No limit"}
+          {t("range")}: {minSalary ? `$${minSalary.toLocaleString()}` : "$0"} –{" "}
+          {maxSalary ? `$${maxSalary.toLocaleString()}` : t("noLimit")}
         </div>
       )}
     </div>

@@ -7,9 +7,11 @@ import toast from "react-hot-toast";
 import uploadImage from "../../utils/uploadImage";
 import Navbar from "../../components/layout/Navbar";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const UserProfile = () => {
   const { user, updateUser } = useAuth();
+  const { t } = useTranslation();
 
   const [profileData, setProfileData] = useState({
     name: user?.name || "",
@@ -62,7 +64,7 @@ const UserProfile = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Profile Details Updated Successfully!!");
+        toast.success(t("profileUpdated"));
         setProfileData({ ...formData });
         updateUser({ ...formData });
       }
@@ -89,7 +91,7 @@ const UserProfile = () => {
       );
 
       if (response.status === 200) {
-        toast.success("Resume Deleted Successfully!!");
+        toast.success(t("resumeDeleted"));
         setProfileData({ ...formData, resume: "" });
         updateUser({ ...formData, resume: "" });
       }
@@ -120,7 +122,7 @@ const UserProfile = () => {
           <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-[#FEFAF9]">
             {/* Header */}
             <div className="bg-[#EB611F] px-8 py-6 flex justify-between items-center">
-              <h1 className="text-xl font-medium text-white">Profile</h1>
+              <h1 className="text-xl font-medium text-white">{t("viewProfile")}</h1>
             </div>
 
             <div className="p-8">
@@ -142,7 +144,7 @@ const UserProfile = () => {
 
                   <div>
                     <label className="block">
-                      <span className="sr-only">Choose avatar</span>
+                      <span className="sr-only">{t("chooseAvatar")}</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -156,21 +158,21 @@ const UserProfile = () => {
                 {/* Name Input */}
                 <div>
                   <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                    Full Name
+                    {t("fullName")}
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     className="w-full px-4 py-3 border border-[#FEFAF9] rounded-lg focus:ring-2 focus:ring-[#EB611F] focus:border-transparent transition-all text-[#2A2A2A]"
-                    placeholder="Enter your full name"
+                    placeholder={t("enterFullName")}
                   />
                 </div>
 
                 {/* Email (Read-only) */}
                 <div>
                   <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                    Email Address
+                    {t("emailAddress")}
                   </label>
                   <input
                     type="email"
@@ -184,11 +186,11 @@ const UserProfile = () => {
                 {user?.resume ? (
                   <div>
                     <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                      Resume
+                      {t("resumeLabel")}
                     </label>
                     <div className="flex items-center gap-2">
                       <p className="text-sm text-[#6B6A6A]">
-                        Link:{" "}
+                        {t("linkLabel")}{" "}
                         <a
                           href={user?.resume}
                           target="_blank"
@@ -197,7 +199,7 @@ const UserProfile = () => {
                           {user?.resume}
                         </a>
                       </p>
-                      <button className="cursor-pointer" onClick={DeleteResume}>
+                      <button className="cursor-pointer" onClick={DeleteResume} aria-label={t("deleteResume")}>
                         <Trash2 className="w-5 h-5 text-red-500" />
                       </button>
                     </div>
@@ -205,7 +207,7 @@ const UserProfile = () => {
                 ) : (
                   <div>
                     <label className="block">
-                      <span className="sr-only">Choose File</span>
+                      <span className="sr-only">{t("chooseFile")}</span>
                       <input
                         type="file"
                         onChange={(e) => handleImageChange(e, "resume")}
@@ -224,7 +226,7 @@ const UserProfile = () => {
                   className="px-6 py-3 border border-[#FEFAF9] text-[#6B6A6A] rounded-lg hover:bg-[#FEFAF9] hover:text-[#2A2A2A] transition-colors flex items-center space-x-2"
                 >
                   <X className="w-4 h-4" />
-                  <span>Cancel</span>
+                  <span>{t("cancel")}</span>
                 </Link>
                 <button
                   onClick={handleSave}
@@ -236,7 +238,7 @@ const UserProfile = () => {
                   ) : (
                     <Save className="w-4 h-4" />
                   )}
-                  <span>{saving ? "Saving..." : "Save Changes"}</span>
+                  <span>{saving ? t("saving") : t("saveChanges")}</span>
                 </button>
               </div>
             </div>

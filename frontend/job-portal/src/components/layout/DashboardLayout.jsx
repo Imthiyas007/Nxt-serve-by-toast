@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { NAVIGATION_MENU } from "../../utils/data";
 import ProfileDropdown from "./ProfileDropdown";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 import logo from "../../assets/nxtserve-logo.png";
 
 // Color replacements applied:
@@ -42,6 +44,7 @@ const NavigationItem = ({ item, isActive, onClick, isCollapsed }) => {
 const DashboardLayout = ({ activeMenu, children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeNavItem, setActiveNavItem] = useState(activeMenu || "dashboard");
@@ -130,7 +133,7 @@ const DashboardLayout = ({ activeMenu, children }) => {
             onClick={logout}
           >
             <LogOut className="h-5 w-5 flex-shrink-0 text-[#6B6A6A]" />
-            {!sidebarCollapsed && <span className="ml-3">Logout</span>}
+            {!sidebarCollapsed && <span className="ml-3">{t("logout")}</span>}
           </button>
         </div>
       </div>
@@ -166,15 +169,16 @@ const DashboardLayout = ({ activeMenu, children }) => {
             )}
             <div>
               <h1 className="text-base font-semibold text-[#2A2A2A]">
-                Welcome back!
+                {t("welcomeBack")}
               </h1>
               <p className="text-sm text-[#6B6A6A] hidden sm:block">
-                Here's what's happening with your jobs today.
+                {t("dashboardSubtitle")}
               </p>
             </div>
           </div>
 
           <div className="flex items-center space-x-3">
+            <LanguageSwitcher />
             <ProfileDropdown
               isOpen={profileDropdownOpen}
               onToggle={(e) => {

@@ -13,9 +13,13 @@ import { validateEmail } from "../../utils/helper";
 import { useAuth } from "../../context/AuthContext";
 import { API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosInstance";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../../components/layout/LanguageSwitcher";
 
 const Login = () => {
   const { login } = useAuth();
+  const { t } = useTranslation();
+  const MotionDiv = motion.div;
 
   const [formData, setFormData] = useState({
     email: "",
@@ -31,7 +35,7 @@ const Login = () => {
   });
 
   const validatePassword = (password) => {
-    if (!password) return "Password is required";
+    if (!password) return t("passwordRequired");
     return "";
   };
 
@@ -52,7 +56,7 @@ const Login = () => {
 
   const validateForm = () => {
     const errors = {
-      email: validateEmail(formData.email),
+      email: validateEmail(formData.email, t),
       password: validatePassword(formData.password),
     };
 
@@ -103,7 +107,7 @@ const Login = () => {
         errors: {
           submit:
             error.response?.data?.message ||
-            "Login failed. Please check your credentials.",
+            t("loginFailed"),
         },
       }));
     }
@@ -112,43 +116,46 @@ const Login = () => {
   if (formState.success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] px-4">
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center"
         >
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Welcome Back!
+            {t("welcome")}
           </h2>
           <p className="text-gray-600 mb-4">
-            You have been successfully logged in.
+            {t("loginSuccess")}
           </p>
           <div className="animate-spin w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full mx-auto" />
           <p className="text-sm text-gray-500 mt-2">
-            Redirecting to your dashboard...
+            {t("redirectingDashboard")}
           </p>
-        </motion.div>
+        </MotionDiv>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] px-4">
-      <motion.div
+      <MotionDiv
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="bg-white p-8 rounded-2xl shadow-md max-w-md w-full"
       >
+        <div className="flex justify-end mb-4">
+          <LanguageSwitcher />
+        </div>
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome Back
+            {t("welcomeBack")}
           </h2>
           <p className="text-gray-500 text-sm">
-            Sign in to your{" "}
+            {t("signInToAccount")}{" "}
             <span className="text-[#FF4D00] font-semibold">NxtServe</span>{" "}
-            account
+            {t("accountLabel")}
           </p>
         </div>
 
@@ -156,7 +163,7 @@ const Login = () => {
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
+              {t("emailAddress")}
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -170,7 +177,7 @@ const Login = () => {
                     ? "border-red-500"
                     : "border-gray-300"
                 } focus:ring-2 focus:ring-[#FF4D00] focus:border-transparent transition-colors`}
-                placeholder="Enter your email"
+                placeholder={t("enterYourEmail")}
               />
             </div>
             {formState.errors.email && (
@@ -184,7 +191,7 @@ const Login = () => {
           {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
+              {t("password")}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -198,7 +205,7 @@ const Login = () => {
                     ? "border-red-500"
                     : "border-gray-300"
                 } focus:ring-2 focus:ring-[#FF4D00] focus:border-transparent transition-colors`}
-                placeholder="Enter your password"
+                placeholder={t("enterYourPassword")}
               />
               <button
                 type="button"
@@ -244,27 +251,27 @@ const Login = () => {
             {formState.loading ? (
               <>
                 <Loader className="w-5 h-5 animate-spin" />
-                <span>Signing In...</span>
+                <span>{t("signingIn")}</span>
               </>
             ) : (
-              <span>Sign In</span>
+              <span>{t("signIn")}</span>
             )}
           </button>
 
           {/* Sign Up Link */}
           <div className="text-center">
             <p className="text-gray-600 text-sm">
-              Don't have an account?{" "}
+              {t("dontHaveAccount")}{" "}
               <a
                 href="/signup"
                 className="text-[#FF4D00] hover:underline font-medium"
               >
-                Create one here
+                {t("createAccount")}
               </a>
             </p>
           </div>
         </form>
-      </motion.div>
+      </MotionDiv>
     </div>
   );
 };

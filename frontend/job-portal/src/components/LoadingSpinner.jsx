@@ -1,6 +1,8 @@
 import { Briefcase } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const LoadingSpinner = () => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-[#FEF7F4]/95 flex items-center justify-center">
       <div className="text-center">
@@ -12,7 +14,7 @@ const LoadingSpinner = () => {
         </div>
 
         <p className="text-[#6B6A6A] font-medium">
-          Finding amazing opportunities...
+          {t("findingOpportunities")}
         </p>
       </div>
     </div>

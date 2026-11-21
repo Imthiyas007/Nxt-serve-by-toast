@@ -1,6 +1,8 @@
 import { MapPin, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const SearchHeader = ({ filters, handleFilterChange }) => {
+  const { t } = useTranslation();
   return (
     <div className="bg-[#FEF7F4]/95 rounded-2xl shadow-lg border border-[#FEFAF9] p-4 lg:p-8 mb-6 lg:mb-8">
       <div className="flex flex-col gap-4 lg:gap-6">
@@ -8,10 +10,10 @@ const SearchHeader = ({ filters, handleFilterChange }) => {
         {/* Title & Subtitle */}
         <div className="text-center lg:text-left">
           <h1 className="text-3xl font-bold text-[#2A2A2A] mb-1">
-            Find Your Dream Job
+            {t("findDreamJob")}
           </h1>
           <p className="text-[#6B6A6A] text-sm lg:text-base">
-            Discover opportunities that match your passion
+            {t("discoverOpportunities")}
           </p>
         </div>
 
@@ -22,7 +24,7 @@ const SearchHeader = ({ filters, handleFilterChange }) => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#6B6A6A]" />
             <input
               type="text"
-              placeholder="Job title, company, or keywords"
+              placeholder={t("jobSearchPlaceholder")}
               className="w-full pl-12 pr-4 py-2 lg:py-2.5 border border-[#FEFAF9] rounded-xl bg-[#FEFAF9] shadow-sm focus:ring-2 focus:ring-[#EB611F]/30 outline-none transition text-[#2A2A2A] placeholder-[#6B6A6A]"
               value={filters.keyword}
               onChange={(e) => handleFilterChange("keyword", e.target.value)}
@@ -34,7 +36,7 @@ const SearchHeader = ({ filters, handleFilterChange }) => {
             <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#6B6A6A]" />
             <input
               type="text"
-              placeholder="Location"
+              placeholder={t("location")}
               className="w-full pl-12 pr-4 py-2 lg:py-2.5 border border-[#FEFAF9] rounded-xl bg-[#FEFAF9] shadow-sm focus:ring-2 focus:ring-[#EB611F]/30 outline-none transition text-[#2A2A2A] placeholder-[#6B6A6A]"
               value={filters.location}
               onChange={(e) => handleFilterChange("location", e.target.value)}
@@ -43,7 +45,7 @@ const SearchHeader = ({ filters, handleFilterChange }) => {
 
           {/* Search Button */}
           <button className="bg-[#EB611F] hover:bg-[#d4551b] text-white px-6 lg:px-10 py-3 lg:py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 font-semibold text-base transform hover:-translate-y-0.5">
-            Search Jobs
+            {t("searchJobs")}
           </button>
         </div>
       </div>

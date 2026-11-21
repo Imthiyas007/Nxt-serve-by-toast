@@ -1,7 +1,8 @@
 import { Briefcase } from "lucide-react";
-import moment from "moment";
+import { useTranslation } from "react-i18next";
 
 const JobDashboardCard = ({ job }) => {
+  const { t, i18n } = useTranslation();
   return (
     <div className="flex items-center justify-between p-4 rounded-xl border border-[#FEFAF9] hover:border-[#FEFAF9] transition-colors bg-[#FEF7F4]/95">
       <div className="flex items-center space-x-4">
@@ -11,7 +12,7 @@ const JobDashboardCard = ({ job }) => {
         <div>
           <h4 className="text-[15px] font-medium text-[#2A2A2A]">{job.title}</h4>
           <p className="text-xs text-[#6B6A6A]">
-            {job.location} • {moment(job.createdAt)?.format("Do MM YYYY")}
+            {job.location} • {new Intl.DateTimeFormat(i18n.resolvedLanguage, { dateStyle: "medium" }).format(new Date(job.createdAt))}
           </p>
         </div>
       </div>
@@ -23,7 +24,7 @@ const JobDashboardCard = ({ job }) => {
               : "bg-[#FEFAF9] text-[#6B6A6A]"
           }`}
         >
-          {job.isClosed ? "Closed" : "Active"}
+          {job.isClosed ? t("closed") : t("active")}
         </span>
       </div>
     </div>

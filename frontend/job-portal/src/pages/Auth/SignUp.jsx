@@ -22,9 +22,13 @@ import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import uploadImage from "../../utils/uploadImage";
 import { useAuth } from "../../context/AuthContext";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../../components/layout/LanguageSwitcher";
 
 const SignUp = () => {
   const { login } = useAuth();
+  const { t } = useTranslation();
+  const MotionDiv = motion.div;
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -68,34 +72,35 @@ const SignUp = () => {
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const error = validateAvatar(file);
-      if (error) {
-        setFormState((prev) => ({
-          ...prev,
-          errors: { ...prev.errors, avatar: error },
-        }));
-        return;
-      }
-      setFormData((prev) => ({ ...prev, avatar: file }));
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFormState((prev) => ({
-          ...prev,
-          avatarPreview: e.target.result,
-          errors: { ...prev.errors, avatar: "" },
-        }));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    const error = validateAvatar(file, t);
+    if (error) {
+      setFormState((prev) => ({
+        ...prev,
+        errors: { ...prev.errors, avatar: error },
+      }));
+      return;
     }
+
+    setFormData((prev) => ({ ...prev, avatar: file }));
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setFormState((prev) => ({
+        ...prev,
+        avatarPreview: event.target.result,
+        errors: { ...prev.errors, avatar: "" },
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const validateForm = () => {
     const errors = {
-      fullName: !formData.fullName ? "Enter full name" : "",
-      email: validateEmail(formData.email),
-      password: validatePassword(formData.password),
-      role: !formData.role ? "Please select a role" : "",
+      fullName: !formData.fullName ? t("enterAccountName") : "",
+      email: validateEmail(formData.email, t),
+      password: validatePassword(formData.password, t),
+      role: !formData.role ? t("selectRole") : "",
       avatar: "",
     };
     Object.keys(errors).forEach((key) => {
@@ -144,7 +149,7 @@ const SignUp = () => {
         errors: {
           submit:
             error.response?.data?.message ||
-            "Registration failed. Please try again.",
+            t("registrationFailed"),
         },
       }));
     }
@@ -153,41 +158,44 @@ const SignUp = () => {
   if (formState.success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center"
         >
           <CheckCircle className="w-16 h-16 text-[#ff4d00] mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Account Created!
+            {t("accountCreated")}
           </h2>
           <p className="text-gray-600 mb-4">
-            Welcome to JobPortal! Your account has been successfully created.
+            {t("registrationSuccess")}
           </p>
           <div className="animate-spin w-6 h-6 border-2 border-[#ff4d00] border-t-transparent rounded-full mx-auto" />
           <p className="text-sm text-gray-500 mt-2">
-            Redirecting to your dashboard...
+            {t("redirectingDashboard")}
           </p>
-        </motion.div>
+        </MotionDiv>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f9f9f9] px-4 py-8">
-      <motion.div
+      <MotionDiv
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full"
       >
+        <div className="flex justify-end mb-4">
+          <LanguageSwitcher />
+        </div>
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Create Account
+            {t("createAccount")}
           </h2>
           <p className="text-sm text-gray-600">
-            Join thousands of professionals finding their dream jobs
+            {t("createAccountSubtitle")}
           </p>
         </div>
 
@@ -195,7 +203,7 @@ const SignUp = () => {
           {/* Full Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Full Name *
+              {t("fullName")} *
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -209,7 +217,7 @@ const SignUp = () => {
                     ? "border-red-500"
                     : "border-gray-300"
                 } focus:ring-2 focus:ring-[#ff4d00] focus:border-transparent transition-colors`}
-                placeholder="Enter your full name"
+                placeholder={t("enterFullName")}
               />
             </div>
             {formState.errors.fullName && (
@@ -223,7 +231,7 @@ const SignUp = () => {
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address *
+              {t("emailAddress")} *
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -235,7 +243,7 @@ const SignUp = () => {
                 className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
                   formState.errors.email ? "border-red-500" : "border-gray-300"
                 } focus:ring-2 focus:ring-[#ff4d00] focus:border-transparent transition-colors`}
-                placeholder="Enter your email"
+                placeholder={t("enterYourEmail")}
               />
             </div>
             {formState.errors.email && (
@@ -249,7 +257,7 @@ const SignUp = () => {
           {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password *
+              {t("password")} *
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -263,7 +271,7 @@ const SignUp = () => {
                     ? "border-red-500"
                     : "border-gray-300"
                 } focus:ring-2 focus:ring-[#ff4d00] focus:border-transparent transition-colors`}
-                placeholder="Create a strong password"
+                placeholder={t("createStrongPassword")}
               />
               <button
                 type="button"
@@ -290,17 +298,17 @@ const SignUp = () => {
             )}
           </div>
 
-          {/* Avatar Upload 
+          {/* Avatar Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Profile Picture (Optional)
+              {t("profilePicture")}
             </label>
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
                 {formState.avatarPreview ? (
                   <img
                     src={formState.avatarPreview}
-                    alt="Avatar preview"
+                    alt={t("profilePicture")}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -320,9 +328,9 @@ const SignUp = () => {
                   className="cursor-pointer bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:border-[#ff4d00] hover:text-[#ff4d00] transition-colors flex items-center space-x-2"
                 >
                   <Upload className="w-4 h-4" />
-                  <span>Upload Photo</span>
+                  <span>{t("uploadPhoto")}</span>
                 </label>
-                <p className="text-xs text-gray-500 mt-1">JPG, PNG up to 5MB</p>
+                <p className="text-xs text-gray-500 mt-1">{t("uploadPhotoHint")}</p>
               </div>
             </div>
             {formState.errors.avatar && (
@@ -331,12 +339,12 @@ const SignUp = () => {
                 {formState.errors.avatar}
               </p>
             )}
-          </div> */}
+          </div>
 
           {/* Role Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
-              I am a *
+              {t("iAm")} *
             </label>
             <div className="grid grid-cols-2 gap-4">
               <button
@@ -349,9 +357,9 @@ const SignUp = () => {
                 }`}
               >
                 <UserCheck className="w-8 h-8 mx-auto mb-2" />
-                <div className="font-medium">Job Seeker</div>
+                <div className="font-medium">{t("jobSeeker")}</div>
                 <div className="text-xs text-gray-500">
-                  Looking for opportunities
+                  {t("jobSeekerHint")}
                 </div>
               </button>
               <button
@@ -364,8 +372,8 @@ const SignUp = () => {
                 }`}
               >
                 <Building2 className="w-8 h-8 mx-auto mb-2" />
-                <div className="font-medium">Employer</div>
-                <div className="text-xs text-gray-500">Hiring talent</div>
+                <div className="font-medium">{t("employer")}</div>
+                <div className="text-xs text-gray-500">{t("employerHint")}</div>
               </button>
             </div>
             {formState.errors.role && (
@@ -395,27 +403,27 @@ const SignUp = () => {
             {formState.loading ? (
               <>
                 <Loader className="w-5 h-5 animate-spin" />
-                <span>Creating Account...</span>
+                <span>{t("creatingAccount")}</span>
               </>
             ) : (
-              <span>Create Account</span>
+              <span>{t("createAccountButton")}</span>
             )}
           </button>
 
           {/* Login Link */}
           <div className="text-center">
             <p className="text-gray-600">
-              Already have an account?{" "}
+              {t("alreadyHaveAccount")}{" "}
               <a
                 href="/login"
                 className="text-[#ff4d00] hover:text-[#e64400] font-medium"
               >
-                Sign in here
+                {t("signInHere")}
               </a>
             </p>
           </div>
         </form>
-      </motion.div>
+      </MotionDiv>
     </div>
   );
 };

@@ -72,6 +72,24 @@
   "smartDashboard": "Panel inteligente",
   "smartDashboardDesc": "Rastrea solicitantes, listas cortas y entrevistas.",
   "fasterHiring": "Contratación más rápida",
-  "fasterHiringDesc": "Reduce el tiempo de contratación en un 60% con automatización."
+  "fasterHiringDesc": "Reduce el tiempo de contratación en un 60% con automatización.",
+  "language": "Idioma",
+  "selectLanguage": "Seleccionar idioma",
+  "loginSuccess": "Has iniciado sesión correctamente.",
+  "redirectingDashboard": "Redirigiendo a tu panel...",
+  "welcomeBack": "Te damos la bienvenida",
+  "signInToAccount": "Inicia sesión en tu",
+  "enterYourPassword": "Ingresa tu contraseña",
+  "signingIn": "Iniciando sesión...",
+  "signIn": "Iniciar sesión",
+  "dontHaveAccount": "¿No tienes una cuenta?",
+  "accountCreated": "¡Cuenta creada!",
+  "registrationSuccess": "Tu cuenta se creó correctamente.",
+  "enterFullName": "Ingresa tu nombre completo",
+  "creatingAccount": "Creando cuenta...",
+  "logout": "Cerrar sesión",
+  "viewProfile": "Ver perfil",
+  "signOut": "Cerrar sesión",
+  "dashboardSubtitle": "Esto es lo que ocurre hoy con tus empleos."
 }
 

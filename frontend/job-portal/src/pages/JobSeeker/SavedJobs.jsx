@@ -12,10 +12,12 @@ import { useEffect, useState } from "react";
 import Navbar from "../../components/layout/Navbar";
 import JobCard from "../../components/Cards/JobCard";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 const SavedJobs = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [savedJobList, setSavedJobList] = useState([]);
   const [viewMode, setViewMode] = useState("grid");
@@ -32,10 +34,11 @@ const SavedJobs = () => {
   const handleUnsaveJob = async (jobId) => {
     try {
       await axiosInstance.delete(API_PATHS.JOBS.UNSAVE_JOB(jobId));
-      toast.success("Job removed successfully!");
+      toast.success(t("jobRemovedSuccess"));
       getSavedJobs();
-    } catch (err) {
-      toast.error("Something went wrong! Try again later");
+    } catch (error) {
+      console.error("Error removing saved job:", error);
+      toast.error(t("tryAgain"));
     }
   };
 
@@ -55,12 +58,13 @@ const SavedJobs = () => {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => navigate(-1)}
+                  aria-label={t("back")}
                   className="group flex items-center space-x-2 px-3.5 py-2.5 text-sm font-medium text-[#6B6A6A] hover:text-[#2A2A2A] bg-[#FEFAF9] hover:bg-[#EB611F]/10 border border-[#FEFAF9] hover:border-transparent rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 >
                   <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                 </button>
                 <h1 className="text-lg lg:text-xl font-semibold leading-tight text-[#2A2A2A]">
-                  Saved Jobs
+                  {t("savedJobs")}
                 </h1>
               </div>
 
@@ -68,6 +72,7 @@ const SavedJobs = () => {
                 <div className="flex items-center border border-[#FEFAF9] rounded-xl p-1 bg-[#FEFAF9]">
                   <button
                     onClick={() => setViewMode("grid")}
+                    aria-label={t("gridView")}
                     className={`p-2 rounded-lg transition-colors ${
                       viewMode === "grid"
                         ? "bg-[#EB611F] text-white shadow-sm"
@@ -78,6 +83,7 @@ const SavedJobs = () => {
                   </button>
                   <button
                     onClick={() => setViewMode("list")}
+                    aria-label={t("listView")}
                     className={`p-2 rounded-lg transition-colors ${
                       viewMode === "list"
                         ? "bg-[#EB611F] text-white shadow-sm"
@@ -98,16 +104,16 @@ const SavedJobs = () => {
                     <Bookmark className="w-16 h-16 mx-auto" />
                   </div>
                   <h3 className="text-xl lg:text-2xl font-bold text-[#2A2A2A] mb-3">
-                    You haven't saved any jobs yet
+                    {t("noSavedJobs")}
                   </h3>
                   <p className="text-[#6B6A6A] mb-6">
-                    Start saving jobs that interest you to view them later.
+                    {t("savedJobsPrompt")}
                   </p>
                   <button
                     onClick={() => navigate(`/find-jobs`)}
                     className="bg-[#EB611F] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#d4551b] transition-colors"
                   >
-                    Browse Jobs
+                    {t("searchJobs")}
                   </button>
                 </div>
               ) : (

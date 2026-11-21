@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Search, Filter, Grid, List, X } from "lucide-react";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import axiosInstance from "../../utils/axiosInstance";
@@ -10,15 +10,16 @@ import FilterContent from "./components/FilterContent";
 import SearchHeader from "./components/SearchHeader";
 import Navbar from "../../components/layout/Navbar";
 import JobCard from "../../components/Cards/JobCard";
+import { useTranslation } from "react-i18next";
 
 const JobSeekerDashboard = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
@@ -37,10 +38,9 @@ const JobSeekerDashboard = () => {
     categories: true,
   });
 
-  const fetchJobs = async (filterParams = {}) => {
+  const fetchJobs = useCallback(async (filterParams = {}) => {
     try {
       setLoading(true);
-      setError(null);
 
       const params = new URLSearchParams();
 
@@ -63,12 +63,12 @@ const JobSeekerDashboard = () => {
       setJobs(jobsData);
     } catch (err) {
       console.error("Error fetching jobs:", err);
-      setError("Failed to fetch jobs. Please try again later.");
+      toast.error(t("tryAgain"));
       setJobs([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [t, user]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -97,7 +97,7 @@ const JobSeekerDashboard = () => {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [filters, user]);
+  }, [fetchJobs, filters]);
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -130,7 +130,7 @@ const JobSeekerDashboard = () => {
       />
       <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-[#FEF7F4]/95 shadow-xl">
         <div className="flex items-center justify-between p-6 border-b border-[#FEFAF9]">
-          <h3 className="font-bold text-[#2A2A2A] text-lg">Filters</h3>
+          <h3 className="font-bold text-[#2A2A2A] text-lg">{t("filters")}</h3>
           <button
             onClick={() => setShowMobileFilters(false)}
             className="p-2 hover:bg-[#FEFAF9] hover:text-[#2A2A2A] rounded-xl transition-colors"
@@ -156,16 +156,16 @@ const JobSeekerDashboard = () => {
   try {
     if (isSaved) {
       await axiosInstance.delete(API_PATHS.JOBS.UNSAVE_JOB(jobId));
-      toast.success("Job removed successfully!");
+      toast.success(t("jobRemovedSuccess"));
     } else {
       await axiosInstance.post(API_PATHS.JOBS.SAVE_JOB(jobId));
-      toast.success("Job saved successfully!");
+      toast.success(t("jobSavedSuccess"));
     }
 
     fetchJobs();
   } catch (err) {
-    console.log("Error:", err);
-    toast.error("Something went wrong! Try again later");
+    console.error("Error saving job:", err);
+    toast.error(t("tryAgain"));
   }
 };
 
@@ -173,14 +173,14 @@ const applyToJob = async (jobId) => {
   try {
     if (jobId) {
       await axiosInstance.post(API_PATHS.APPLICATIONS.APPLY_TO_JOB(jobId));
-      toast.success("Applied to job successfully!");
+      toast.success(t("applicationAppliedSuccess"));
     }
 
     fetchJobs();
   } catch (err) {
-    console.log("Error:", err);
+    console.error("Error applying to job:", err);
     const errorMsg = err?.response?.data?.message;
-    toast.error(errorMsg || "Something went wrong! Try again later");
+    toast.error(errorMsg || t("tryAgain"));
   }
 };
 
@@ -203,7 +203,7 @@ return (
           <div className="hidden lg:block w-80 flex-shrink-0">
             <div className="bg-[#FEF7F4]/80 backdrop-blur-xl rounded-2xl shadow-lg border border-[#FEFAF9]/20 p-6 sticky top-20">
               <h3 className="font-bold text-[#2A2A2A] text-xl mb-6">
-                Filter Jobs
+                {t("filters")}
               </h3>
               <FilterContent
                 toggleSection={toggleSection}
@@ -219,11 +219,11 @@ return (
             <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 lg:mb-8 gap-4">
               <div>
                 <p className="text-[#6B6A6A] text-sm lg:text-base">
-                  Showing{" "}
-                  <span className="font-bold text-[#2A2A2A]">
-                    {jobs.length}
-                  </span>{" "}
-                  jobs
+                  {t("showingRange", {
+                    start: jobs.length === 0 ? 0 : 1,
+                    end: jobs.length,
+                    total: jobs.length,
+                  })}
                 </p>
               </div>
 
@@ -233,7 +233,7 @@ return (
                   className="lg:hidden flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-[#FEFAF9] font-medium text-[#6B6A6A] hover:bg-[#FEFAF9] transition-colors"
                 >
                   <Filter className="w-4 h-4" />
-                  Filters
+                  {t("filters")}
                 </button>
 
                 <div className="flex items-center gap-3 lg:gap-4">
@@ -269,16 +269,16 @@ return (
                   <Search className="w-16 h-16 mx-auto" />
                 </div>
                 <h3 className="text-xl lg:text-2xl font-bold text-[#2A2A2A] mb-3">
-                  No jobs found
+                  {t("noJobsFound")}
                 </h3>
                 <p className="text-[#6B6A6A] mb-6">
-                  Try adjusting your search criteria or filters.
+                  {t("adjustSearchFilters")}
                 </p>
                 <button
                   onClick={clearAllFilters}
                   className="bg-[#EB611F] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#EB611F]/90 transition-colors"
                 >
-                  Clear All Filters
+                  {t("clearAll")}
                 </button>
               </div>
             ) : (

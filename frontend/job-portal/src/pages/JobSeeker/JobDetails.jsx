@@ -9,20 +9,21 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Navbar from "../../components/layout/Navbar";
-import moment from "moment";
 import StatusBadge from "../../components/StatusBadge";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 const JobDetails = () => {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { jobId } = useParams();
   const navigate = useNavigate();
 
   const [jobDetails, setJobDetails] = useState(null);
 
-  const getJobDetailsById = async () => {
+  const getJobDetailsById = useCallback(async () => {
     try {
       const response = await axiosInstance.get(
         API_PATHS.JOBS.GET_JOB_BY_ID(jobId),
@@ -34,18 +35,18 @@ const JobDetails = () => {
     } catch (error) {
       console.error("Error fetching job details:", error);
     }
-  };
+  }, [jobId, user]);
 
   const applyToJob = async () => {
     try {
       if (jobId) {
         await axiosInstance.post(API_PATHS.APPLICATIONS.APPLY_TO_JOB(jobId));
-        toast.success("Applied to job successfully!");
+        toast.success(t("applicationAppliedSuccess"));
       }
       getJobDetailsById();
     } catch (err) {
       const errorMsg = err?.response?.data?.message;
-      toast.error(errorMsg || "Something went wrong! Try again later");
+      toast.error(errorMsg || t("tryAgain"));
     }
   };
 
@@ -55,7 +56,7 @@ const JobDetails = () => {
     } else if (!user) {
       navigate("/login");
     }
-  }, [jobId, user]);
+  }, [getJobDetailsById, jobId, navigate, user]);
 
   return (
     <div className="bg-[#FEF7F4]/95">
@@ -69,7 +70,7 @@ const JobDetails = () => {
                 {jobDetails?.company?.companyLogo ? (
                   <img
                     src={jobDetails?.company?.companyLogo}
-                    alt="Company Logo"
+                    alt={t("companyLogo")}
                     className="h-20 w-20 object-cover rounded-2xl border-4 border-[#FEFAF9] shadow-lg"
                   />
                 ) : (
@@ -99,7 +100,7 @@ const JobDetails = () => {
                     className="bg-[#EB611F] hover:bg-[#d4551b] text-white px-6 py-2.5 rounded-xl transition-all duration-200 font-semibold transform hover:-translate-y-0.5"
                     onClick={applyToJob}
                   >
-                    Apply Now
+                    {t("applyNow")}
                   </button>
                 )}
               </div>
@@ -107,17 +108,23 @@ const JobDetails = () => {
               {/* Tags */}
               <div className="flex flex-wrap gap-3">
                 <span className="px-4 py-2 bg-[#FEFAF9] text-sm text-[#EB611F] font-semibold rounded-full border border-[#EB611F]/30">
-                  {jobDetails.category}
+                  {jobDetails.category && t(jobDetails.category.toLowerCase())}
                 </span>
                 <span className="px-4 py-2 text-sm bg-[#FEFAF9] text-[#6B6A6A] font-semibold rounded-full border border-[#FEFAF9]">
-                  {jobDetails.type}
+                  {jobDetails.type && t(
+                    jobDetails.type === "Full-Time"
+                      ? "fullTime"
+                      : jobDetails.type === "Part-Time"
+                        ? "partTime"
+                        : jobDetails.type?.toLowerCase()
+                  )}
                 </span>
                 <div className="flex items-center space-x-1 px-4 py-2 bg-[#FEFAF9] text-sm text-[#6B6A6A] font-semibold rounded-full border border-[#FEFAF9]">
                   <Clock className="h-4 w-4" />
                   <span>
                     {jobDetails.createdAt
-                      ? moment(jobDetails.createdAt).format("Do MMM YYYY")
-                      : "N/A"}
+                      ? new Intl.DateTimeFormat(i18n.resolvedLanguage, { dateStyle: "medium" }).format(new Date(jobDetails.createdAt))
+                      : t("notAvailable")}
                   </span>
                 </div>
               </div>
@@ -134,19 +141,19 @@ const JobDetails = () => {
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold text-[#2A2A2A] mb-1">
-                        Compensation
+                        {t("compensation")}
                       </h3>
                       <div className="text-lg font-bold text-[#2A2A2A]">
                         {jobDetails.salaryMin} - {jobDetails.salaryMax}
                         <span className="text-lg text-[#6B6A6A] font-normal ml-1">
-                          per year
+                          {t("perYear")}
                         </span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 text-sm text-[#EB611F] bg-[#FEFAF9] px-3 py-1 rounded-full border border-[#EB611F]/30">
                     <Users className="h-4 w-4" />
-                    <span>Competitive</span>
+                    <span>{t("competitive")}</span>
                   </div>
                 </div>
               </div>
@@ -156,7 +163,7 @@ const JobDetails = () => {
             <div className="space-y-4 mt-8">
               <h3 className="text-2xl font-bold text-[#2A2A2A] flex items-center space-x-3">
                 <div className="w-1 h-8 bg-[#EB611F] rounded-full"></div>
-                <span className="text-lg">About This Role</span>
+                <span className="text-lg">{t("aboutRole")}</span>
               </h3>
               <div className="bg-[#FEFAF9] border border-[#FEFAF9] rounded-xl p-6">
                 <div className="text-sm text-[#6B6A6A] leading-relaxed whitespace-pre-wrap">
@@ -169,7 +176,7 @@ const JobDetails = () => {
             <div className="space-y-4 mt-8">
               <h3 className="text-2xl font-bold text-[#2A2A2A] flex items-center space-x-3">
                 <div className="w-1 h-8 bg-[#EB611F] rounded-full"></div>
-                <span className="text-lg">What We're Looking For</span>
+                <span className="text-lg">{t("whatLookingFor")}</span>
               </h3>
               <div className="bg-[#FEFAF9] border border-[#FEFAF9] rounded-xl p-6">
                 <div className="text-sm text-[#6B6A6A] leading-relaxed whitespace-pre-wrap">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Users,
   Calendar,
@@ -11,40 +11,41 @@ import {
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { useLocation, useNavigate } from "react-router-dom";
-import moment from "moment";
 import { getInitials } from "../../utils/helper";
 
 import DashboardLayout from '../../components/layout/DashboardLayout'
 import StatusBadge from "../../components/StatusBadge";
 import ApplicantProfilePreview from "../../components/Cards/ApplicantProfilePreview";
+import { useTranslation } from "react-i18next";
 
 const ApplicationViewer = () => {
   const location = useLocation();
   const jobId = location.state?.jobId || null;
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
 
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
 
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get(
         API_PATHS.APPLICATIONS.GET_ALL_APPLICATIONS(jobId)
       );
       setApplications(response.data);
-    } catch (err) {
-      console.log("Failed to fetch applications");
+    } catch (error) {
+      console.error("Failed to fetch applications:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [jobId]);
 
   useEffect(() => {
     if (jobId) fetchApplications();
     else navigate("/manage-jobs");
-  }, []);
+  }, [fetchApplications, jobId, navigate]);
 
   const groupedApplications = useMemo(() => {
     const filtered = applications.filter((app) => app.job && app.job.title);
@@ -71,7 +72,7 @@ const ApplicationViewer = () => {
         <div className="min-h-screen bg-[#FEF7F4]/95 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EB611F] mx-auto"></div>
-            <p className="mt-4 text-[#6B6A6A]">Loading applications...</p>
+            <p className="mt-4 text-[#6B6A6A]">{t("loadingApplications")}</p>
           </div>
         </div>
       )}
@@ -85,11 +86,11 @@ const ApplicationViewer = () => {
                 className="group flex items-center space-x-2 px-3 py-2 text-sm font-medium text-[#6B6A6A] hover:text-[#2A2A2A] bg-[#FEF7F4]/95 hover:bg-[#FEFAF9] border border-[#FEFAF9] hover:border-transparent rounded-xl transition-all duration-300 shadow-lg shadow-[#FEFAF9] hover:shadow-xl"
               >
                 <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                <span>Back</span>
+                <span>{t("back")}</span>
               </button>
 
               <h1 className="text-xl md:text-2xl font-semibold text-[#2A2A2A]">
-                Applications Overview
+                {t("applicationsOverview")}
               </h1>
             </div>
           </div>
@@ -100,10 +101,10 @@ const ApplicationViewer = () => {
             <div className="text-center py-16">
               <Users className="mx-auto h-24 w-24 text-[#FEFAF9]" />
               <h3 className="mt-4 text-lg font-medium text-[#2A2A2A]">
-                No applications available
+                {t("noApplicationsAvailable")}
               </h3>
               <p className="mt-2 text-[#6B6A6A]">
-                No applications found at the moment.
+                {t("noApplicationsFound")}
               </p>
             </div>
           ) : (
@@ -127,17 +128,16 @@ const ApplicationViewer = () => {
                             </div>
                             <div className="flex items-center gap-1">
                               <Briefcase className="h-4 w-4" />
-                              <span className="text-sm">{job.type}</span>
+                              <span className="text-sm">{job.type && t(job.type === "Full-Time" ? "fullTime" : job.type === "Part-Time" ? "partTime" : job.type.toLowerCase())}</span>
                             </div>
                             <div className="flex items-center gap-1">
-                              <span className="text-sm">{job.category}</span>
+                              <span className="text-sm">{job.category && t(job.category.toLowerCase())}</span>
                             </div>
                           </div>
                         </div>
                         <div className="bg-[#FEF7F4]/95 backdrop-blur-sm rounded-lg px-3 py-2">
                           <span className="text-sm text-[#2A2A2A] font-medium">
-                            {applications.length} Application
-                            {applications.length !== 1 ? "s" : ""}
+                            {t("applicationCount", { total: applications.length })}
                           </span>
                         </div>
                       </div>
@@ -177,10 +177,12 @@ const ApplicationViewer = () => {
                                 <div className="flex items-center gap-1 mt-1 text-[#6B6A6A] text-xs">
                                   <Calendar className="h-3 w-3" />
                                   <span>
-                                    Applied{" "}
-                                    {moment(application.createdAt)?.format(
-                                      "Do MM YYYY"
-                                    )}
+                                    {t("appliedOn", {
+                                      date: new Intl.DateTimeFormat(
+                                        i18n.resolvedLanguage,
+                                        { dateStyle: "medium" }
+                                      ).format(new Date(application.createdAt)),
+                                    })}
                                   </span>
                                 </div>
                               </div>
@@ -197,7 +199,7 @@ const ApplicationViewer = () => {
                                 className="inline-flex items-center gap-2 px-3 py-2 bg-[#EB611F] text-[#FEFAF9] text-sm font-medium rounded-lg hover:bg-[#EB611F] transition-colors"
                               >
                                 <Download className="h-4 w-4" />
-                                Resume
+                                {t("resumeLabel")}
                               </button>
 
                               <button
@@ -207,7 +209,7 @@ const ApplicationViewer = () => {
                                 className="inline-flex items-center gap-2 px-3 py-2 bg-[#FEFAF9] text-[#2A2A2A] text-sm font-medium rounded-lg hover:bg-[#FEFAF9] transition-colors"
                               >
                                 <Eye className="h-4 w-4" />
-                                View Profile
+                                {t("viewProfile")}
                               </button>
                             </div>
                           </div>

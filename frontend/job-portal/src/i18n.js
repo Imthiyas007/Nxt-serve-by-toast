@@ -14,26 +14,41 @@ import hi from './locales/hi/common.json';
 import ar from './locales/ar/common.json';
 import ta from './locales/ta/common.json';
 import ko from './locales/ko/common.json';
+import { SUPPORTED_LANGUAGES } from './locales/languages';
+import { UI_TRANSLATIONS } from './locales/ui';
+
+const localeResources = {
+  'en-US': enUS,
+  es,
+  zh,
+  vi,
+  fr,
+  pt,
+  fil,
+  hi,
+  ar,
+  ta,
+  ko,
+};
+
+const updateDocumentLanguage = (language) => {
+  const resolvedLanguage = i18n.resolvedLanguage || language;
+  document.documentElement.lang = resolvedLanguage;
+  document.documentElement.dir = i18n.dir(resolvedLanguage);
+};
 
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     fallbackLng: 'en-US',
-    supportedLngs: ['en-US', 'es', 'zh', 'vi', 'fr', 'pt', 'fil', 'hi', 'ar', 'ta', 'ko'],
-    resources: {
-      'en-US': { common: enUS },
-      es: { common: es },
-      zh: { common: zh },
-      vi: { common: vi },
-      fr: { common: fr },
-      pt: { common: pt },
-      fil: { common: fil },
-      hi: { common: hi },
-      ar: { common: ar },
-      ta: { common: ta },
-      ko: { common: ko },
-    },
+    supportedLngs: SUPPORTED_LANGUAGES.map(({ code }) => code),
+    resources: Object.fromEntries(
+      SUPPORTED_LANGUAGES.map(({ code }) => [
+        code,
+        { common: { ...localeResources[code], ...UI_TRANSLATIONS[code] } },
+      ])
+    ),
     ns: ['common'],
     defaultNS: 'common',
     detection: {
@@ -48,6 +63,9 @@ i18n
     react: {
       useSuspense: false,
     },
-  });
+  })
+  .then(() => updateDocumentLanguage(i18n.resolvedLanguage || i18n.language));
+
+i18n.on('languageChanged', updateDocumentLanguage);
 
 export default i18n;

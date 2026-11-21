@@ -18,8 +18,10 @@ import InputField from "../../components/Input/InputField";
 import SelectField from "../../components/Input/SelectField";
 import TextareaField from "../../components/Input/TextareaField";
 import JobPostingPreview from "../../components/Cards/JobPostingPreview";
+import { useTranslation } from "react-i18next";
 
 const JobPostingForm = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const jobId = location.state?.jobId || null;
@@ -57,20 +59,20 @@ const JobPostingForm = () => {
 
   const validateForm = () => {
     const validationErrors = {};
-    if (!formData.jobTitle?.trim()) validationErrors.jobTitle = "Job title is required";
-    if (!formData.location?.trim()) validationErrors.location = "Location is required";
-    if (!formData.category?.trim()) validationErrors.category = "Category is required";
-    if (!formData.jobType?.trim()) validationErrors.jobType = "Job type is required";
-    if (!formData.description?.trim()) validationErrors.description = "Description is required";
-    if (!formData.requirements?.trim()) validationErrors.requirements = "Requirements are required";
-    if (formData.salaryMin === "") validationErrors.salaryMin = "Minimum salary is required";
-    if (formData.salaryMax === "") validationErrors.salaryMax = "Maximum salary is required";
+    if (!formData.jobTitle?.trim()) validationErrors.jobTitle = t("jobTitleRequired");
+    if (!formData.location?.trim()) validationErrors.location = t("locationRequired");
+    if (!formData.category?.trim()) validationErrors.category = t("categoryRequired");
+    if (!formData.jobType?.trim()) validationErrors.jobType = t("jobTypeRequired");
+    if (!formData.description?.trim()) validationErrors.description = t("descriptionRequired");
+    if (!formData.requirements?.trim()) validationErrors.requirements = t("requirementsRequired");
+    if (formData.salaryMin === "") validationErrors.salaryMin = t("salaryMinRequired");
+    if (formData.salaryMax === "") validationErrors.salaryMax = t("salaryMaxRequired");
     if (
       formData.salaryMin !== "" &&
       formData.salaryMax !== "" &&
       Number(formData.salaryMin) >= Number(formData.salaryMax)
     ) {
-      validationErrors.salary = "Minimum salary must be less than maximum salary";
+      validationErrors.salary = t("salaryInvalid");
     }
     return validationErrors;
   };
@@ -113,7 +115,7 @@ const JobPostingForm = () => {
 
       if (response.status === 200 || response.status === 201) {
         toast.success(
-          jobId ? "Job Updated Successfully!" : "Job Posted Successfully!"
+          jobId ? t("jobUpdatedSuccess") : t("jobPostedSuccess")
         );
         setFormData({
           jobTitle: "",
@@ -132,14 +134,14 @@ const JobPostingForm = () => {
       }
 
       console.error("Unexpected response:", response);
-      toast.error("Something went wrong. Please try again.");
+      toast.error(t("tryAgain"));
     } catch (error) {
       if (error.response?.data?.message) {
         console.error("API Error:", error.response.data.message);
         toast.error(error.response.data.message);
       } else {
         console.error("Unexpected error:", error);
-        toast.error("Failed to post/update job. Please try again.");
+        toast.error(t("jobPostFailed"));
       }
     } finally {
       setIsSubmitting(false);
@@ -196,10 +198,10 @@ const JobPostingForm = () => {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-xl font-bold text-[#2A2A2A]">
-                  Post a New Job
+                  {t("postNewJob")}
                 </h2>
                 <p className="text-sm text-[#6B6A6A] mt-1">
-                  Fill out the form below to create your job posting
+                  {t("createJobPostingHelp")}
                 </p>
               </div>
               <div className="flex items-center space-x-2">
@@ -210,16 +212,16 @@ const JobPostingForm = () => {
                   className="group flex items-center space-x-2 px-6 py-3 text-sm font-medium text-[#6B6A6A] hover:text-[#2A2A2A] bg-white/50 hover:bg-[#FEFAF9] border border-[#FEFAF9] hover:border-transparent rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
                   <Eye className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                  <span>Preview</span>
+                  <span>{t("preview")}</span>
                 </button>
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <InputField
-                label="Job Title"
+                label={t("jobTitleLabel")}
                 id="jobTitle"
-                placeholder="e.g., Executive Chef / Head Chef"
+                placeholder={t("jobTitlePlaceholder")}
                 value={formData.jobTitle}
                 onChange={(e) => handleInputChange("jobTitle", e.target.value)}
                 error={errors.jobTitle}
@@ -231,9 +233,9 @@ const JobPostingForm = () => {
                 <div className="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
                   <div className="flex-1">
                     <InputField
-                      label="Location"
+                      label={t("location")}
                       id="location"
-                      placeholder="e.g., New York, NY"
+                      placeholder={t("jobLocationPlaceholder")}
                       value={formData.location}
                       onChange={(e) =>
                         handleInputChange("location", e.target.value)
@@ -257,33 +259,45 @@ const JobPostingForm = () => {
                     className="rounded border-[#FEFAF9] text-[#EB611F] shadow-sm focus:border-[#EB611F] focus:ring focus:ring-[#EB611F]/30 focus:ring-opacity-50"
                   />
                   <label htmlFor="isRemote" className="text-sm font-medium text-[#2A2A2A]">
-                    Remote Position
+                    {t("remotePosition")}
                   </label>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <SelectField
-                  label="Category"
+                  label={t("category")}
                   id="category"
                   value={formData.category}
                   onChange={(e) =>
                     handleInputChange("category", e.target.value)
                   }
-                  options={CATEGORIES}
-                  placeholder="Select a category"
+                  options={CATEGORIES.map((option) => ({
+                    ...option,
+                    label: t(option.value.toLowerCase()),
+                  }))}
+                  placeholder={t("selectCategory")}
                   error={errors.category}
                   required
                   icon={Users}
                 />
 
                 <SelectField
-                  label="Job Type"
+                  label={t("jobType")}
                   id="jobType"
                   value={formData.jobType}
                   onChange={(e) => handleInputChange("jobType", e.target.value)}
-                  options={JOB_TYPES}
-                  placeholder="Select job type"
+                  options={JOB_TYPES.map((option) => ({
+                    ...option,
+                    label: t(
+                      option.value === "Full-Time"
+                        ? "fullTime"
+                        : option.value === "Part-Time"
+                          ? "partTime"
+                          : option.value.toLowerCase()
+                    ),
+                  }))}
+                  placeholder={t("selectJobType")}
                   error={errors.jobType}
                   required
                   icon={Briefcase}
@@ -291,35 +305,35 @@ const JobPostingForm = () => {
               </div>
 
               <TextareaField
-                label="Job Description"
+                label={t("jobDescriptionLabel")}
                 id="description"
-                placeholder="Describe the role and responsibilities..."
+                placeholder={t("descriptionPlaceholder")}
                 value={formData.description}
                 onChange={(e) =>
                   handleInputChange("description", e.target.value)
                 }
                                 error={errors.description}
-                helperText="Include key responsibilities, day-to-day tasks, and what makes this role exciting"
+                helperText={t("responsibilitiesHelp")}
                 required
               />
 
               <TextareaField
-                label="Requirements"
+                label={t("requirementsLabel")}
                 id="requirements"
-                placeholder="List key qualifications and skills..."
+                placeholder={t("requirementsPlaceholder")}
                 value={formData.requirements}
                 onChange={(e) =>
                   handleInputChange("requirements", e.target.value)
                 }
                 error={errors.requirements}
-                helperText="Include required skills, experience level, education, and any preferred qualifications"
+                helperText={t("qualificationsHelp")}
                 required
               />
 
               {/* Salary Range */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-[#2A2A2A]">
-                  Salary Range <span className="text-red-500">*</span>
+                  {t("salaryRange")} <span className="text-red-500">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="relative">
@@ -328,7 +342,7 @@ const JobPostingForm = () => {
                     </div>
                     <input
                       type="number"
-                      placeholder="Min"
+                      placeholder={t("minimum")}
                       value={formData.salaryMin}
                       aria-invalid={Boolean(errors.salaryMin)}
                       onChange={(e) =>
@@ -346,7 +360,7 @@ const JobPostingForm = () => {
                     </div>
                     <input
                       type="number"
-                      placeholder="Max"
+                      placeholder={t("maximum")}
                       value={formData.salaryMax}
                       aria-invalid={Boolean(errors.salaryMax)}
                       onChange={(e) =>
@@ -377,12 +391,12 @@ const JobPostingForm = () => {
                   {isSubmitting ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Publishing Job...
+                      {t("publishingJob")}
                     </>
                   ) : (
                     <>
                       <Send className="h-5 w-5 mr-2" />
-                      Publish Job
+                      {t("publishJob")}
                     </>
                   )}
                 </button>

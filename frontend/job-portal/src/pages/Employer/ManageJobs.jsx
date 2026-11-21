@@ -15,9 +15,11 @@ import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import DashboardLayout from "../../components/layout/DashboardLayout";
+import { useTranslation } from "react-i18next";
 
 const ManageJobs = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -86,7 +88,7 @@ const ManageJobs = () => {
     try {
       await axiosInstance.delete(API_PATHS.JOBS.DELETE_JOB(jobId));
       setJobs(jobs.filter((job) => job.id !== jobId));
-      toast.success("Job listing deleted successfully");
+      toast.success(t("jobDeletedSuccess"));
     } catch (error) {
       console.error("Error deleting job:", error);
     }
@@ -164,10 +166,10 @@ const ManageJobs = () => {
             <div className="flex flex-row items-center justify-between">
               <div className="mb-4 sm:mb-0">
                 <h1 className="text-xl md:text-2xl font-semibold text-[#2A2A2A]">
-                  Job Management
+                  {t("jobManagement")}
                 </h1>
                 <p className="text-sm text-[#6B6A6A] mt-1">
-                  Manage your job postings and track applications
+                  {t("manageJobPostings")}
                 </p>
               </div>
 
@@ -176,7 +178,7 @@ const ManageJobs = () => {
                 onClick={() => navigate("/post-job")}
               >
                 <Plus className="w-5 h-5 mr-2" />
-                Add New Job
+                {t("addNewJob")}
               </button>
             </div>
           </div>
@@ -191,7 +193,7 @@ const ManageJobs = () => {
                 </div>
                 <input
                   type="text"
-                  placeholder="Search jobs..."
+                  placeholder={t("searchJobsPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="block w-full pl-10 pr-4 py-2 text-sm border border-[#FEFAF9] rounded-lg focus:ring-2 focus:ring-[#EB611F]/20 focus:border-[#EB611F] outline-0 transition-all duration-200 bg-[#FEFAF9] placeholder-[#6B6A6A]"
@@ -205,9 +207,9 @@ const ManageJobs = () => {
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="block w-full px-4 py-2 text-sm border border-[#FEFAF9] rounded-lg focus:ring-2 focus:ring-[#EB611F]/20 focus:border-[#EB611F] transition-all duration-200 bg-[#FEFAF9] text-[#2A2A2A]"
                 >
-                  <option value="All">All Status</option>
-                  <option value="Active">Active</option>
-                  <option value="Closed">Closed</option>
+                  <option value="All">{t("allStatus")}</option>
+                  <option value="Active">{t("active")}</option>
+                  <option value="Closed">{t("closed")}</option>
                 </select>
               </div>
             </div>
@@ -215,7 +217,11 @@ const ManageJobs = () => {
             {/* Results Summary */}
             <div className="my-4">
               <p className="text-sm text-[#6B6A6A]">
-                Showing {paginatedJobs.length} of {filteredAndSortedJobs.length} jobs
+                {t("showingRange", {
+                  start: filteredAndSortedJobs.length === 0 ? 0 : startIndex + 1,
+                  end: startIndex + paginatedJobs.length,
+                  total: filteredAndSortedJobs.length,
+                })}
               </p>
             </div>
 
@@ -227,10 +233,10 @@ const ManageJobs = () => {
                     <Search className="w-10 h-10 text-[#6B6A6A]" />
                   </div>
                   <h3 className="text-lg font-medium text-[#2A2A2A] mb-2">
-                    No jobs found
+                    {t("noJobsFound")}
                   </h3>
                   <p className="text-[#6B6A6A]">
-                    Try adjusting your search or filter criteria
+                    {t("adjustSearchFilters")}
                   </p>
                 </div>
               ) : (
@@ -245,13 +251,13 @@ const ManageJobs = () => {
                             onClick={() => handleSort(field)}
                           >
                             <div className="flex items-center space-x-1">
-                              <span>{field.charAt(0).toUpperCase() + field.slice(1)}</span>
+                              <span>{t(field === "title" ? "jobTitleLabel" : field === "status" ? "statusLabel" : "applicants").replace(/:$/, "")}</span>
                               <SortIcon field={field} />
                             </div>
                           </th>
                         ))}
                         <th className="px-6 py-4 text-left text-xs font-semibold text-[#6B6A6A] uppercase tracking-wider">
-                          Actions
+                          {t("actions")}
                         </th>
                       </tr>
                     </thead>
@@ -283,7 +289,7 @@ const ManageJobs = () => {
                                       : "bg-[#FEFAF9] text-[#6B6A6A] border border-[#FEFAF9]"
                                   }`}
                                 >
-                                  {job.status}
+                                  {t(job.status.toLowerCase())}
                                 </span>
                               </td>
                               <td className="px-6 py-5 whitespace-nowrap">
@@ -303,6 +309,7 @@ const ManageJobs = () => {
                                 <div className="flex space-x-2">
                                   <button
                                     className="text-[#EB611F] hover:text-[#d4551b] p-2 rounded-lg hover:bg-[#FEFAF9] transition-colors duration-200"
+                                    aria-label={t("editJob")}
                                     onClick={() =>
                                       navigate("/post-job", {
                                         state: { jobId: job.id },
@@ -318,7 +325,7 @@ const ManageJobs = () => {
                                       className="flex items-center gap-2 text-xs text-[#EB611F] hover:text-[#d4551b] p-2 rounded-lg hover:bg-[#FEFAF9] transition-colors duration-200"
                                     >
                                       <X className="w-4 h-4" />
-                                      <span className="hidden sm:inline">Close</span>
+                                      <span className="hidden sm:inline">{t("closeJob")}</span>
                                     </button>
                                   ) : (
                                     <button
@@ -326,12 +333,13 @@ const ManageJobs = () => {
                                       className="flex items-center gap-2 text-xs text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors duration-200"
                                     >
                                       <Plus className="w-4 h-4" />
-                                      <span className="hidden sm:inline">Activate</span>
+                                      <span className="hidden sm:inline">{t("activateJob")}</span>
                                     </button>
                                   )}
 
                                   <button
                                     onClick={() => handleDeleteJob(job.id)}
+                                    aria-label={t("deleteJob")}
                                     className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors duration-200"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -355,7 +363,7 @@ const ManageJobs = () => {
                     disabled={currentPage === 1}
                     className="relative inline-flex items-center px-4 py-2 border border-[#FEFAF9] text-sm font-medium rounded-md text-[#2A2A2A] bg-[#FEF7F4]/95 hover:bg-[#FEFAF9] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Previous
+                    {t("previous")}
                   </button>
                   <button
                     onClick={() =>
@@ -364,17 +372,17 @@ const ManageJobs = () => {
                     disabled={currentPage === totalPages}
                     className="ml-3 relative inline-flex items-center px-4 py-2 border border-[#FEFAF9] text-sm font-medium rounded-md text-[#2A2A2A] bg-[#FEF7F4]/95 hover:bg-[#FEFAF9] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Next
+                    {t("next")}
                   </button>
                 </div>
                 <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm text-[#6B6A6A]">
-                      Showing <span className="font-medium">{startIndex + 1}</span> to{" "}
-                      <span className="font-medium">
-                        {Math.min(startIndex + itemsPerPage, filteredAndSortedJobs.length)}
-                      </span>{" "}
-                      of <span className="font-medium">{filteredAndSortedJobs.length}</span> results
+                      {t("showingRange", {
+                        start: filteredAndSortedJobs.length === 0 ? 0 : startIndex + 1,
+                        end: Math.min(startIndex + itemsPerPage, filteredAndSortedJobs.length),
+                        total: filteredAndSortedJobs.length,
+                      })}
                     </p>
                   </div>
                   <div>
@@ -384,7 +392,7 @@ const ManageJobs = () => {
                         disabled={currentPage === 1}
                         className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-[#FEFAF9] bg-[#FEF7F4]/95 text-sm font-medium text-[#6B6A6A] hover:bg-[#FEFAF9] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Previous
+                        {t("previous")}
                       </button>
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                         <button
@@ -404,7 +412,7 @@ const ManageJobs = () => {
                         disabled={currentPage === totalPages}
                         className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-[#FEFAF9] bg-[#FEF7F4]/95 text-sm font-medium text-[#6B6A6A] hover:bg-[#FEFAF9] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Next
+                        {t("next")}
                       </button>
                     </nav>
                   </div>

@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const ProfileDropdown = ({
   isOpen,
@@ -11,6 +12,7 @@ const ProfileDropdown = ({
   userRole
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="relative">
@@ -34,7 +36,7 @@ const ProfileDropdown = ({
         <div className="hidden sm:block text-left">
           <p className="text-sm font-medium text-[#2A2A2A]">{companyName}</p>
           <p className="text-xs text-[#6B6A6A]">
-            {userRole === "jobseeker" ? "Job Seeker" : "Employer"}
+            {userRole === "jobseeker" ? t("jobSeeker") : t("employer")}
           </p>
         </div>
         <ChevronDown className="h-4 w-4 text-[#6B6A6A]" />
@@ -53,7 +55,7 @@ const ProfileDropdown = ({
             }
             className="block px-4 py-2 text-sm text-[#6B6A6A] hover:bg-[#FEFAF9] transition-colors"
           >
-            View Profile
+            {t("viewProfile")}
           </a>
           <div className="border-t border-[#FEFAF9] mt-2 pt-2">
             <a
@@ -61,7 +63,7 @@ const ProfileDropdown = ({
               onClick={onLogout}
               className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
             >
-              Sign out
+              {t("signOut")}
             </a>
           </div>
         </div>

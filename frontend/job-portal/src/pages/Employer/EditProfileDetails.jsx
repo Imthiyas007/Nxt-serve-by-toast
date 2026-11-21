@@ -1,5 +1,6 @@
 import { Save, X } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
+import { useTranslation } from "react-i18next";
 
 const EditProfileDetails = ({
   formData,
@@ -10,6 +11,7 @@ const EditProfileDetails = ({
   saving,
   uploading,
 }) => {
+  const { t } = useTranslation();
   return (
     <DashboardLayout activeMenu="company-profile">
       {formData && (
@@ -19,7 +21,7 @@ const EditProfileDetails = ({
               {/* Header */}
               <div className="bg-[#EB611F] px-8 py-6">
                 <h1 className="text-lg md:text-xl font-medium text-[#FEFAF9]">
-                  Edit Profile
+                  {t("editProfile")}
                 </h1>
               </div>
 
@@ -29,7 +31,7 @@ const EditProfileDetails = ({
                   {/* Personal Information */}
                   <div className="space-y-6">
                     <h2 className="text-lg font-medium text-[#2A2A2A] border-b pb-2">
-                      Personal Information
+                      {t("personalInformation")}
                     </h2>
 
                     {/* Avatar Upload */}
@@ -48,7 +50,7 @@ const EditProfileDetails = ({
                       </div>
                       <div>
                         <label className="block">
-                          <span className="sr-only">Choose avatar</span>
+                          <span className="sr-only">{t("chooseAvatar")}</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -62,7 +64,7 @@ const EditProfileDetails = ({
                     {/* Name Input */}
                     <div>
                       <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                        Full Name
+                        {t("fullName")}
                       </label>
                       <input
                         type="text"
@@ -71,14 +73,14 @@ const EditProfileDetails = ({
                           handleInputChange("name", e.target.value)
                         }
                         className="w-full px-4 py-3 border border-[#FEFAF9] rounded-lg focus:ring-2 focus:ring-[#EB611F] focus:border-transparent transition-all"
-                        placeholder="Enter your full name"
+                        placeholder={t("enterFullName")}
                       />
                     </div>
 
                     {/* Email (Read-only) */}
                     <div>
                       <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                        Email Address
+                        {t("emailAddress")}
                       </label>
                       <input
                         type="email"
@@ -92,7 +94,7 @@ const EditProfileDetails = ({
                   {/* Company Information */}
                   <div className="space-y-6">
                     <h2 className="text-lg font-medium text-[#2A2A2A] border-b pb-2">
-                      Company Information
+                      {t("companyInformation")}
                     </h2>
 
                     {/* Company Logo Upload */}
@@ -111,7 +113,7 @@ const EditProfileDetails = ({
                       </div>
                       <div>
                         <label className="block">
-                          <span className="sr-only">Choose company logo</span>
+                          <span className="sr-only">{t("chooseCompanyLogo")}</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -125,7 +127,7 @@ const EditProfileDetails = ({
                     {/* Company Name */}
                     <div>
                       <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                        Company Name
+                        {t("companyName")}
                       </label>
                       <input
                         type="text"
@@ -134,14 +136,14 @@ const EditProfileDetails = ({
                           handleInputChange("companyName", e.target.value)
                         }
                         className="w-full px-4 py-3 border border-[#FEFAF9] rounded-lg focus:ring-2 focus:ring-[#EB611F] focus:border-transparent transition-all"
-                        placeholder="Enter company name"
+                        placeholder={t("enterCompanyName")}
                       />
                     </div>
 
                     {/* Company Description */}
                     <div>
                       <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                        Company Description
+                        {t("companyDescription")}
                       </label>
                       <textarea
                         value={formData.companyDescription}
@@ -153,7 +155,7 @@ const EditProfileDetails = ({
                         }
                         rows={4}
                         className="w-full px-4 py-3 border border-[#FEFAF9] rounded-lg focus:ring-2 focus:ring-[#EB611F] focus:border-transparent transition-all resize-none"
-                        placeholder="Describe your company..."
+                        placeholder={t("describeCompany")}
                       />
                     </div>
                   </div>
@@ -166,7 +168,7 @@ const EditProfileDetails = ({
                     className="px-6 py-3 border border-[#FEFAF9] text-[#2A2A2A] rounded-lg hover:bg-[#FEFAF9] transition-colors flex items-center space-x-2"
                   >
                     <X className="w-4 h-4" />
-                    <span>Cancel</span>
+                    <span>{t("cancel")}</span>
                   </button>
                   <button
                     onClick={handleSave}
@@ -178,7 +180,7 @@ const EditProfileDetails = ({
                     ) : (
                       <Save className="w-4 h-4" />
                     )}
-                    <span>{saving ? "Saving..." : "Save Changes"}</span>
+                    <span>{saving ? t("saving") : t("saveChanges")}</span>
                   </button>
                 </div>
               </div>

@@ -7,7 +7,6 @@ import {
   TrendingUp,
   CheckCircle2,
 } from "lucide-react";
-import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
@@ -15,6 +14,7 @@ import DashboardLayout from "../../components/layout/DashboardLayout";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import JobDashboardCard from "../../components/Cards/JobDashboardCard";
 import ApplicantDashboardCard from "../../components/Cards/ApplicantDashboardCard";
+import { useTranslation } from "react-i18next";
 
 const Card = ({ title, headerAction, subtitle, className, children }) => (
   <div
@@ -38,6 +38,7 @@ const Card = ({ title, headerAction, subtitle, className, children }) => (
 );
 
 const StatCard = ({ title, value, icon: Icon, trend, trendValue, color = "blue" }) => {
+  const IconComponent = Icon;
   const colorClasses = {
     blue: "from-[#2563eb] to-[#1e40af]",
     green: "from-[#10b981] to-[#047857]",
@@ -59,7 +60,7 @@ const StatCard = ({ title, value, icon: Icon, trend, trendValue, color = "blue" 
           )}
         </div>
         <div className="bg-white/10 p-3 rounded-xl">
-          <Icon className="h-6 w-6" />
+          <IconComponent className="h-6 w-6" />
         </div>
       </div>
     </Card>
@@ -68,8 +69,25 @@ const StatCard = ({ title, value, icon: Icon, trend, trendValue, color = "blue" 
 
 const EmployerDashboard = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const formatRelativeTime = (date) => {
+    const difference = Date.now() - new Date(date).getTime();
+    const units = [
+      ["year", 31536000000],
+      ["month", 2592000000],
+      ["day", 86400000],
+      ["hour", 3600000],
+      ["minute", 60000],
+    ];
+    const [unit, duration] =
+      units.find(([, unitDuration]) => Math.abs(difference) >= unitDuration) ||
+      units[units.length - 1];
+    return new Intl.RelativeTimeFormat(i18n.resolvedLanguage, {
+      numeric: "auto",
+    }).format(-Math.round(difference / duration), unit);
+  };
 
   const getDashboardOverView = async () => {
     try {
@@ -79,7 +97,7 @@ const EmployerDashboard = () => {
         setDashboardData(response.data);
       }
     } catch (error) {
-      console.log("error");
+      console.error("Failed to fetch employer dashboard:", error);
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +116,7 @@ const EmployerDashboard = () => {
           {/* 📊 Dashboard Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <StatCard
-              title="Active Jobs"
+              title={t("activeJobs")}
               value={dashboardData?.counts?.totalActiveJobs || 0}
               icon={Briefcase}
               trend
@@ -106,7 +124,7 @@ const EmployerDashboard = () => {
               color="blue"
             />
             <StatCard
-              title="Total Applicants"
+              title={t("totalApplicants")}
               value={dashboardData?.counts?.totalApplications || 0}
               icon={Users}
               trend
@@ -114,7 +132,7 @@ const EmployerDashboard = () => {
               color="green"
             />
             <StatCard
-              title="Hired"
+              title={t("hired")}
               value={dashboardData?.counts?.totalHired || 0}
               icon={CheckCircle2}
               trend
@@ -126,14 +144,14 @@ const EmployerDashboard = () => {
           {/* 📝 Recent Activity */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <Card
-              title="Recent Job Posts"
-              subtitle="Your latest job postings"
+              title={t("recentJobPosts")}
+              subtitle={t("latestJobPostings")}
               headerAction={
                 <button
                   className="text-sm font-medium text-[#f97316] hover:text-[#c2410c]"
                   onClick={() => navigate("/manage-jobs")}
                 >
-                  View all
+                  {t("viewAll")}
                 </button>
               }
             >
@@ -145,14 +163,14 @@ const EmployerDashboard = () => {
             </Card>
 
             <Card
-              title="Recent Applications"
-              subtitle="Latest candidate applications"
+              title={t("recentApplications")}
+              subtitle={t("latestCandidateApplications")}
               headerAction={
                 <button
                   className="text-sm font-medium text-[#f97316] hover:text-[#c2410c]"
                   onClick={() => navigate("/manage-jobs")}
                 >
-                  View all
+                  {t("viewAll")}
                 </button>
               }
             >
@@ -162,7 +180,7 @@ const EmployerDashboard = () => {
                     key={index}
                     applicant={data?.applicant || ""}
                     position={data?.job?.title || ""}
-                    time={moment(data?.updatedAt).fromNow()}
+                    time={formatRelativeTime(data?.updatedAt)}
                   />
                 ))}
               </div>
@@ -170,23 +188,23 @@ const EmployerDashboard = () => {
           </div>
 
           {/* ⚡ Quick Actions */}
-          <Card title="Quick Actions" subtitle="Common tasks to get you started">
+          <Card title={t("quickActions")} subtitle={t("commonTasks")}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
                 {
-                  title: "Post New Job",
+                  title: t("postNewJob"),
                   icon: Plus,
                   color: "bg-[#eff6ff] text-[#2563eb]",
                   path: "/post-job",
                 },
                 {
-                  title: "Review Applications",
+                  title: t("reviewApplications"),
                   icon: Users,
                   color: "bg-[#ecfdf5] text-[#047857]",
                   path: "/manage-jobs",
                 },
                 {
-                  title: "Company Settings",
+                  title: t("companySettings"),
                   icon: Building2,
                   color: "bg-[#fff7ed] text-[#c2410c]",
                   path: "/company-profile",
