@@ -33,8 +33,16 @@ axiosInstance.interceptors.response.use(
     // Handle common errors globally
     if (error.response) {
       if (error.response.status === 401) {
-        // Redirect to login page
-        window.location.href = "/login";
+        const requestUrl = error.config?.url || "";
+        const isAuthenticationAttempt =
+          /\/api\/auth\/(login|register)(?:[/?]|$)/.test(requestUrl);
+
+        if (!isAuthenticationAttempt && window.location.pathname !== "/login") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          localStorage.removeItem("refreshToken");
+          window.location.assign("/login");
+        }
       } else if (error.response.status === 500) {
         console.error("Server error. Please try again later.");
       }

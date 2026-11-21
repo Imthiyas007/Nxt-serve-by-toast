@@ -10,8 +10,10 @@ const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const savedJobsRoutes = require("./routes/savedJobsRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
+app.set("trust proxy", 1);
 
 // Allowed frontend origins (add your deployed frontend URLs here)
 const allowedOrigins = [
@@ -52,6 +54,7 @@ app.get("/", (_req, res) => {
       applications: "/api/applications",
       savedJobs: "/api/save-jobs",
       analytics: "/api/analytics",
+      ai: "/api/ai",
       health: "/api/health",
     },
   });
@@ -67,6 +70,14 @@ const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20, // limit each IP to 20 requests per windowMs
   message: { message: "Too many requests from this IP, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: { message: "Too many AI requests. Please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -88,6 +99,7 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/save-jobs", savedJobsRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/ai", aiLimiter, aiRoutes);
 
 // Health check
 app.get("/api/health", (_req, res) => {

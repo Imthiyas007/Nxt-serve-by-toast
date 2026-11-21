@@ -6,7 +6,7 @@ import {
   Users,
 } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { useCallback, useEffect, useState } from "react";
@@ -14,16 +14,23 @@ import Navbar from "../../components/layout/Navbar";
 import StatusBadge from "../../components/StatusBadge";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import formatSalaryRange from "../../utils/formatSalary";
 
 const JobDetails = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { jobId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [jobDetails, setJobDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const getJobDetailsById = useCallback(async () => {
+    setLoading(true);
+    setLoadError(false);
     try {
       const response = await axiosInstance.get(
         API_PATHS.JOBS.GET_JOB_BY_ID(jobId),
@@ -34,16 +41,24 @@ const JobDetails = () => {
       setJobDetails(response.data);
     } catch (error) {
       console.error("Error fetching job details:", error);
+      setLoadError(true);
+    } finally {
+      setLoading(false);
     }
   }, [jobId, user]);
 
   const applyToJob = async () => {
+    if (!user) {
+      navigate("/login", { state: { from: location } });
+      return;
+    }
+
     try {
       if (jobId) {
         await axiosInstance.post(API_PATHS.APPLICATIONS.APPLY_TO_JOB(jobId));
         toast.success(t("applicationAppliedSuccess"));
       }
-      getJobDetailsById();
+      await getJobDetailsById();
     } catch (err) {
       const errorMsg = err?.response?.data?.message;
       toast.error(errorMsg || t("tryAgain"));
@@ -51,18 +66,32 @@ const JobDetails = () => {
   };
 
   useEffect(() => {
-    if (jobId && user) {
+    if (jobId) {
       getJobDetailsById();
-    } else if (!user) {
-      navigate("/login");
     }
-  }, [getJobDetailsById, jobId, navigate, user]);
+  }, [getJobDetailsById, jobId]);
 
   return (
     <div className="bg-[#FEF7F4]/95">
       <Navbar />
       <div className="container mx-auto pt-24">
-        {jobDetails && (
+        {loading ? (
+          <LoadingSpinner />
+        ) : loadError || !jobDetails ? (
+          <div
+            role="alert"
+            className="mx-4 rounded-xl border border-red-200 bg-white p-8 text-center text-[#6B6A6A]"
+          >
+            <p>{t("tryAgain")}</p>
+            <button
+              type="button"
+              onClick={getJobDetailsById}
+              className="mt-4 rounded-lg bg-[#EB611F] px-4 py-2 font-semibold text-white"
+            >
+              {t("retry")}
+            </button>
+          </div>
+        ) : (
           <div className="bg-[#FEFAF9] p-6 rounded-2xl border border-[#FEFAF9] shadow-md">
             {/* Header */}
             <div className="relative px-0 pb-8 border-b border-[#FEFAF9]">
@@ -95,14 +124,15 @@ const JobDetails = () => {
 
                 {jobDetails?.applicationStatus ? (
                   <StatusBadge status={jobDetails.applicationStatus} />
-                ) : (
+                ) : user?.role !== "employer" ? (
                   <button
+                    type="button"
                     className="bg-[#EB611F] hover:bg-[#d4551b] text-white px-6 py-2.5 rounded-xl transition-all duration-200 font-semibold transform hover:-translate-y-0.5"
                     onClick={applyToJob}
                   >
                     {t("applyNow")}
                   </button>
-                )}
+                ) : null}
               </div>
 
               {/* Tags */}
@@ -144,10 +174,11 @@ const JobDetails = () => {
                         {t("compensation")}
                       </h3>
                       <div className="text-lg font-bold text-[#2A2A2A]">
-                        {jobDetails.salaryMin} - {jobDetails.salaryMax}
-                        <span className="text-lg text-[#6B6A6A] font-normal ml-1">
-                          {t("perYear")}
-                        </span>
+                        {formatSalaryRange(
+                          jobDetails,
+                          i18n.resolvedLanguage,
+                          t("notAvailable")
+                        )}
                       </div>
                     </div>
                   </div>

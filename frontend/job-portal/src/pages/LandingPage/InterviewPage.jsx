@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
 
 const TEXT_MODEL = 'gemini-3.5-flash-lite';
 const TTS_MODEL = 'gemini-3.8-flash-tts';
@@ -35,7 +37,6 @@ const InterviewPage = () => {
     
     // Refs for managing DOM elements and APIs
     const messagesEndRef = useRef(null);
-    const audioContextRef = useRef(null);
 
     // Predefined job roles for a quick start to the interview
     const jobRoles = [
@@ -69,62 +70,37 @@ const InterviewPage = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // Initializes the AudioContext to handle audio playback
-    const initializeAudioContext = () => {
-        if (!audioContextRef.current) {
-            audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-        }
-    };
-
     // Helper function to call the Gemini API with exponential backoff for retries
     const callGeminiAPI = async (payload, model) => {
-        const apiKey = import.meta.env.VITE_GEMINI_API_KEY; // Ensure this is set in your environment variables
-        if (!apiKey) {
-            setApiError(t("apiKeyMissing"));
-            return null;
-        }
-
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
         let retries = 0;
         const maxRetries = 3;
         const initialBackoff = 1000;
 
         while (retries < maxRetries) {
             try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorBody = await response.json().catch(() => null);
-                    const detail = errorBody?.error?.message;
-                    if (response.status === 401) {
-                        setApiError(t("apiAuthError"));
-                        return null;
-                    } else if (response.status === 429) { 
-                        const backoffTime = initialBackoff * Math.pow(2, retries);
-                        await new Promise(res => setTimeout(res, backoffTime));
-                        retries++;
-                        continue;
-                    }
-                    if (response.status === 404) {
-                        throw new Error(detail || `Gemini model "${model}" was not found or is unavailable to this API key.`);
-                    }
-                    throw new Error(detail || `HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
+                const response = await axiosInstance.post(
+                    API_PATHS.AI.GENERATE_CONTENT,
+                    { model, payload }
+                );
                 setApiError(null);
-                return result;
+                return response.data;
 
             } catch (error) {
                 console.error('Error fetching from Gemini API:', error);
-                if (error.message.includes('401')) {
+                const status = error.response?.status;
+                if (error.response?.data?.code === "AI_AUTH_FAILED") {
                     setApiError(t("apiAuthError"));
                     return null;
+                }
+                if (status === 503) {
+                    setApiError(t("aiServiceUnavailable"));
+                    return null;
+                }
+                if (status === 429) {
+                    const backoffTime = initialBackoff * Math.pow(2, retries);
+                    await new Promise(res => setTimeout(res, backoffTime));
+                    retries++;
+                    continue;
                 }
                 setApiError(t("tryAgain"));
                 return null;
@@ -171,7 +147,6 @@ const InterviewPage = () => {
     // Function to call the TTS API and play audio from the AI's message
     const handleSpeakMessage = async (text) => {
         setIsTtsLoading(true);
-        initializeAudioContext();
 
         const payload = {
             contents: [{
@@ -187,6 +162,7 @@ const InterviewPage = () => {
             }
         };
 
+        let audioUrl;
         try {
             const result = await callGeminiAPI(payload, TTS_MODEL);
             const part = result?.candidates?.[0]?.content?.parts?.[0];
@@ -201,20 +177,28 @@ const InterviewPage = () => {
                 const wavBlob = mimeType.includes("wav")
                     ? new Blob([audioBytes], { type: mimeType })
                     : pcmToWav(audioBytes.buffer, sampleRate);
-                const audioUrl = URL.createObjectURL(wavBlob);
+                audioUrl = URL.createObjectURL(wavBlob);
                 
                 const audio = new Audio(audioUrl);
-                audio.play();
                 audio.onended = () => {
                     URL.revokeObjectURL(audioUrl);
                     setIsTtsLoading(false);
                 };
+                audio.onerror = () => {
+                    URL.revokeObjectURL(audioUrl);
+                    setApiError(t("tryAgain"));
+                    setIsTtsLoading(false);
+                };
+                await audio.play();
             } else {
                 console.error("Invalid audio response from API");
+                setApiError(t("tryAgain"));
                 setIsTtsLoading(false);
             }
         } catch (error) {
             console.error("Error with TTS API:", error);
+            if (audioUrl) URL.revokeObjectURL(audioUrl);
+            setApiError(t("tryAgain"));
             setIsTtsLoading(false);
         }
     };

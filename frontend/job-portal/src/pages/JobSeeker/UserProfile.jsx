@@ -21,7 +21,7 @@ const UserProfile = () => {
   });
 
   const [formData, setFormData] = useState({ ...profileData });
-  const [uploading, setUploading] = useState({ avatar: false, logo: false });
+  const [uploading, setUploading] = useState({ avatar: false, resume: false });
   const [saving, setSaving] = useState(false);
 
   const handleInputChange = (field, value) => {
@@ -36,10 +36,13 @@ const UserProfile = () => {
 
     try {
       const imgUploadRes = await uploadImage(file);
-      const avatarUrl = imgUploadRes.imageUrl || "";
-      handleInputChange(type, avatarUrl);
+      if (!imgUploadRes.imageUrl) {
+        throw new Error("Upload response did not include a file URL");
+      }
+      handleInputChange(type, imgUploadRes.imageUrl);
     } catch (error) {
-      console.error("Image upload failed:", error);
+      console.error("File upload failed:", error);
+      toast.error(t("tryAgain"));
     } finally {
       setUploading((prev) => ({ ...prev, [type]: false }));
     }
@@ -48,10 +51,9 @@ const UserProfile = () => {
   const handleImageChange = (e, type) => {
     const file = e.target.files[0];
     if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      handleInputChange(type, previewUrl);
       handleImageUpload(file, type);
     }
+    e.target.value = "";
   };
 
   const handleSave = async () => {
@@ -70,6 +72,7 @@ const UserProfile = () => {
       }
     } catch (error) {
       console.error("Profile update failed:", error);
+      toast.error(t("tryAgain"));
     } finally {
       setSaving(false);
     }
@@ -92,11 +95,13 @@ const UserProfile = () => {
 
       if (response.status === 200) {
         toast.success(t("resumeDeleted"));
-        setProfileData({ ...formData, resume: "" });
-        updateUser({ ...formData, resume: "" });
+        setProfileData((prev) => ({ ...prev, resume: "" }));
+        setFormData((prev) => ({ ...prev, resume: "" }));
+        updateUser({ resume: "" });
       }
     } catch (error) {
-      console.error("Profile update failed:", error);
+      console.error("Resume deletion failed:", error);
+      toast.error(t("tryAgain"));
     } finally {
       setSaving(false);
     }
@@ -107,6 +112,7 @@ const UserProfile = () => {
       name: user?.name || "",
       email: user?.email || "",
       avatar: user?.avatar || "",
+      resume: user?.resume || "",
     };
 
     setProfileData({ ...userData });
@@ -147,8 +153,9 @@ const UserProfile = () => {
                       <span className="sr-only">{t("chooseAvatar")}</span>
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg,image/png"
                         onChange={(e) => handleImageChange(e, "avatar")}
+                        disabled={uploading.avatar}
                         className="block w-full text-sm text-[#6B6A6A] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#FEFAF9] file:text-[#EB611F] hover:file:bg-[#FEFAF9] hover:file:text-[#2A2A2A] transition-colors"
                       />
                     </label>
@@ -194,12 +201,19 @@ const UserProfile = () => {
                         <a
                           href={user?.resume}
                           target="_blank"
+                          rel="noreferrer"
                           className="text-[#EB611F] underline cursor-pointer hover:text-[#2A2A2A]"
                         >
                           {user?.resume}
                         </a>
                       </p>
-                      <button className="cursor-pointer" onClick={DeleteResume} aria-label={t("deleteResume")}>
+                      <button
+                        type="button"
+                        className="cursor-pointer"
+                        onClick={DeleteResume}
+                        disabled={saving || uploading.resume}
+                        aria-label={t("deleteResume")}
+                      >
                         <Trash2 className="w-5 h-5 text-red-500" />
                       </button>
                     </div>
@@ -210,7 +224,9 @@ const UserProfile = () => {
                       <span className="sr-only">{t("chooseFile")}</span>
                       <input
                         type="file"
+                        accept="application/pdf,.pdf"
                         onChange={(e) => handleImageChange(e, "resume")}
+                        disabled={uploading.resume}
                         className="block w-full text-sm text-[#6B6A6A] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#FEFAF9] file:text-[#EB611F] hover:file:bg-[#FEFAF9] hover:file:text-[#2A2A2A] transition-colors"
                       />
                     </label>
@@ -230,7 +246,7 @@ const UserProfile = () => {
                 </Link>
                 <button
                   onClick={handleSave}
-                  disabled={saving || uploading.avatar || uploading.logo}
+                  disabled={saving || uploading.avatar || uploading.resume}
                   className="px-6 py-3 bg-[#EB611F] text-white rounded-lg hover:bg-[#EB611F]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
                 >
                   {saving ? (

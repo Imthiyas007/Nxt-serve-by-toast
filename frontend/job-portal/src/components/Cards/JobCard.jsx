@@ -1,26 +1,16 @@
 import { Bookmark, Building, Building2, Calendar, MapPin } from "lucide-react";
-import moment from "moment";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 import StatusBadge from "../StatusBadge";
 import { useTranslation } from "react-i18next";
+import formatSalaryRange from "../../utils/formatSalary";
 
-const JobCard = ({ job, onClick, onToggleSave, onApply, saved, hideApply }) => {
+const JobCard = ({ job, onToggleSave, onApply, saved, hideApply }) => {
   const { user } = useAuth();
-  const { t } = useTranslation();
-
-  const formatSalary = (min) => {
-    const formatNumber = (num) => {
-      if (num >= 1000) return `$${(num / 1000).toFixed(0)}k`;
-      return `$${num}`;
-    };
-    return `${formatNumber(min)}/m`;
-  };
+  const { t, i18n } = useTranslation();
 
   return (
-    <div
-      className="bg-[#FEF7F4]/95 rounded-2xl border border-[#FEFAF9] p-6 hover:shadow-xl hover:shadow-[#FEFAF9] transition-all duration-300 group relative overflow-hidden cursor-pointer"
-      onClick={onClick}
-    >
+    <article className="bg-[#FEF7F4]/95 rounded-2xl border border-[#FEFAF9] p-6 hover:shadow-xl hover:shadow-[#FEFAF9] transition-all duration-300 group relative overflow-hidden">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-4">
           {job?.company?.companyLogo ? (
@@ -37,7 +27,12 @@ const JobCard = ({ job, onClick, onToggleSave, onApply, saved, hideApply }) => {
 
           <div className="flex-1">
             <h3 className="font-semibold text-[#2A2A2A] text-base group-hover:text-[#EB611F] transition-colors leading-snug">
-              {job?.title}
+              <Link
+                to={`/job/${job?._id}`}
+                className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB611F]"
+              >
+                {job?.title}
+              </Link>
             </h3>
             <p className="text-[#6B6A6A] text-sm flex items-center gap-2 mt-1">
               <Building className="w-3.5 h-3.5" />
@@ -47,12 +42,10 @@ const JobCard = ({ job, onClick, onToggleSave, onApply, saved, hideApply }) => {
         </div>
         {user && (
           <button
+            type="button"
             className="p-2 hover:bg-[#FEFAF9] rounded-xl transition-colors"
             aria-label={t(job?.isSaved || saved ? "removeSavedJob" : "saveJob")}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleSave();
-            }}
+            onClick={onToggleSave}
           >
             <Bookmark
               className={`w-5 h-5 hover:text-[#EB611F] ${
@@ -99,28 +92,29 @@ const JobCard = ({ job, onClick, onToggleSave, onApply, saved, hideApply }) => {
           <span className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5" />
             {job?.createdAt
-              ? moment(job.createdAt).format("Do MMM YYYY")
-              : "N/A"}
+              ? new Intl.DateTimeFormat(i18n.resolvedLanguage, {
+                  dateStyle: "medium",
+                }).format(new Date(job.createdAt))
+              : t("notAvailable")}
           </span>
         </div>
       </div>
 
       <div className="flex items-center justify-between">
         <div className="text-[#EB611F] font-semibold text-lg">
-          {formatSalary(job?.salaryMin)}
+          {formatSalaryRange(job, i18n.resolvedLanguage, t("notAvailable"))}
         </div>
         {!saved && (
           <>
             {job?.applicationStatus ? (
               <StatusBadge status={job?.applicationStatus} />
             ) : (
-              !hideApply && (
+              !hideApply &&
+              (!user || user.role === "jobseeker") && (
                 <button
+                  type="button"
                   className="bg-gradient-to-r from-[#FEFAF9] to-[#FEFAF9] text-sm text-[#EB611F] hover:text-white px-6 py-2.5 rounded-xl hover:from-[#EB611F] hover:to-[#EB611F] transition-all duration-200 font-semibold transform hover:-translate-y-0.5"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onApply();
-                  }}
+                  onClick={onApply}
                 >
                   {t("applyNow")}
                 </button>
@@ -129,7 +123,7 @@ const JobCard = ({ job, onClick, onToggleSave, onApply, saved, hideApply }) => {
           </>
         )}
       </div>
-    </div>
+    </article>
   );
 };
 

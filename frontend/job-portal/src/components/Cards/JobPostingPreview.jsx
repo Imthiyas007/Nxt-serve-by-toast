@@ -9,12 +9,11 @@ import {
 import { CATEGORIES, JOB_TYPES } from "../../utils/data";
 import { useAuth } from "../../context/useAuth";
 import { useTranslation } from "react-i18next";
+import formatSalaryRange from "../../utils/formatSalary";
 
 const JobPostingPreview = ({ formData, setIsPreview }) => {
   const { user } = useAuth();
-  const { t } = useTranslation();
-  const currencies = [{ value: "usd", label: "$" }];
-
+  const { t, i18n } = useTranslation();
   return (
     <div className="min-h-screen bg-[#FEF7F4]/95 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -109,21 +108,11 @@ const JobPostingPreview = ({ formData, setIsPreview }) => {
                           {t("compensation")}
                         </h3>
                         <div className="text-sm md:text-lg font-bold text-[#2A2A2A]">
-                          {
-                            currencies.find(
-                              (c) => c.value === formData.currency
-                            )?.label
-                          }
-                          {Number(formData.salaryMin).toLocaleString()} -{" "}
-                          {
-                            currencies.find(
-                              (c) => c.value === formData.currency
-                            )?.label
-                          }
-                          {Number(formData.salaryMax).toLocaleString()}
-                          <span className="text-sm md:text-lg text-[#6B6A6A] font-normal ml-1">
-                            {t("perYear")}
-                          </span>
+                          {formatSalaryRange(
+                            formData,
+                            i18n.resolvedLanguage,
+                            t("notAvailable")
+                          )}
                         </div>
                       </div>
                     </div>

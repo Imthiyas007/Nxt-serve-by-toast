@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Search,
   Plus,
@@ -26,14 +26,15 @@ const ManageJobs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState("title");
   const [sortDirection, setSortDirection] = useState("asc");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const itemsPerPage = 8;
   const [jobs, setJobs] = useState([]);
 
   const filteredAndSortedJobs = useMemo(() => {
     let filtered = jobs.filter((job) => {
       const matchesSearch =
-        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (job.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         (job.company || "").toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus =
         statusFilter === "All" || job.status === statusFilter;
@@ -78,19 +79,21 @@ const ManageJobs = () => {
   const handleStatusChange = async (jobId) => {
     try {
       await axiosInstance.put(API_PATHS.JOBS.TOGGLE_CLOSE(jobId));
-      getPostedJobs(true);
+      await getPostedJobs();
     } catch (error) {
       console.error("Error toggling job status:", error);
+      toast.error(t("tryAgain"));
     }
   };
 
   const handleDeleteJob = async (jobId) => {
     try {
       await axiosInstance.delete(API_PATHS.JOBS.DELETE_JOB(jobId));
-      setJobs(jobs.filter((job) => job.id !== jobId));
+      setJobs((currentJobs) => currentJobs.filter((job) => job.id !== jobId));
       toast.success(t("jobDeletedSuccess"));
     } catch (error) {
       console.error("Error deleting job:", error);
+      toast.error(t("tryAgain"));
     }
   };
 
@@ -131,32 +134,44 @@ const ManageJobs = () => {
     </tr>
   );
 
-  const getPostedJobs = async (disableLoader) => {
-    setIsLoading(!disableLoader);
+  const getPostedJobs = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(false);
     try {
       const response = await axiosInstance.get(API_PATHS.JOBS.GET_JOBS_EMPLOYER);
-      if (response.status === 200 && response.data?.length > 0) {
-        const formattedJobs = response.data.map((job) => ({
-          id: job._id,
-          title: job.title,
-          company: job.company?.name,
-          status: job.isClosed ? "Closed" : "Active",
-          applicants: job.applicationCount || 0,
-          datePosted: moment(job.createdAt).format("DD-MM-YYYY"),
-          logo: job.company?.companyLogo,
-        }));
-        setJobs(formattedJobs);
+      if (!Array.isArray(response.data)) {
+        throw new Error("Employer jobs response was not a list");
       }
+      const formattedJobs = response.data.map((job) => ({
+        id: job._id,
+        title: job.title,
+        company: job.company?.name,
+        status: job.isClosed ? "Closed" : "Active",
+        applicants: job.applicationCount || 0,
+        datePosted: moment(job.createdAt).format("DD-MM-YYYY"),
+        logo: job.company?.companyLogo,
+      }));
+      setJobs(formattedJobs);
     } catch (error) {
-      console.error(error.response?.data?.message || "Error posting job.");
+      console.error("Error fetching employer jobs:", error);
+      setLoadError(true);
+      toast.error(t("tryAgain"));
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     getPostedJobs();
-  }, []);
+  }, [getPostedJobs]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, Math.max(totalPages, 1)));
+  }, [totalPages]);
     return (
     <DashboardLayout activeMenu="manage-jobs">
       <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-[#FEF7F4]/95">
@@ -227,7 +242,18 @@ const ManageJobs = () => {
 
             {/* Table */}
             <div className="bg-[#FEF7F4]/95 backdrop-blur-sm rounded-2xl border border-[#FEFAF9] overflow-hidden">
-              {filteredAndSortedJobs.length === 0 && !isLoading ? (
+              {loadError && !isLoading ? (
+                <div role="alert" className="py-12 text-center">
+                  <p className="text-[#6B6A6A]">{t("tryAgain")}</p>
+                  <button
+                    type="button"
+                    className="mt-4 rounded-lg bg-[#EB611F] px-4 py-2 font-semibold text-white"
+                    onClick={getPostedJobs}
+                  >
+                    {t("retry")}
+                  </button>
+                </div>
+              ) : filteredAndSortedJobs.length === 0 && !isLoading ? (
                 <div className="text-center py-12">
                   <div className="w-24 h-24 mx-auto bg-[#FEFAF9] rounded-full flex items-center justify-center mb-4">
                     <Search className="w-10 h-10 text-[#6B6A6A]" />
@@ -247,13 +273,23 @@ const ManageJobs = () => {
                         {["title", "status", "applicants"].map((field) => (
                           <th
                             key={field}
+                            aria-sort={
+                              sortField === field
+                                ? sortDirection === "asc"
+                                  ? "ascending"
+                                  : "descending"
+                                : "none"
+                            }
                             className="px-6 py-4 text-left text-xs font-semibold text-[#6B6A6A] uppercase tracking-wider cursor-pointer hover:bg-[#FEFAF9] transition-all duration-200"
-                            onClick={() => handleSort(field)}
                           >
-                            <div className="flex items-center space-x-1">
+                            <button
+                              type="button"
+                              onClick={() => handleSort(field)}
+                              className="flex items-center gap-1 text-left"
+                            >
                               <span>{t(field === "title" ? "jobTitleLabel" : field === "status" ? "statusLabel" : "applicants").replace(/:$/, "")}</span>
                               <SortIcon field={field} />
-                            </div>
+                            </button>
                           </th>
                         ))}
                         <th className="px-6 py-4 text-left text-xs font-semibold text-[#6B6A6A] uppercase tracking-wider">

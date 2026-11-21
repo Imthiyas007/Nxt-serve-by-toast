@@ -1,7 +1,7 @@
 import { MapPin, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-const SearchHeader = ({ filters, handleFilterChange }) => {
+const SearchHeader = ({ filters, handleFilterChange, onSearch }) => {
   const { t } = useTranslation();
   return (
     <div className="bg-[#FEF7F4]/95 rounded-2xl shadow-lg border border-[#FEFAF9] p-4 lg:p-8 mb-6 lg:mb-8">
@@ -18,12 +18,19 @@ const SearchHeader = ({ filters, handleFilterChange }) => {
         </div>
 
         {/* Search Inputs */}
-        <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            onSearch();
+          }}
+          className="flex flex-col lg:flex-row gap-3 lg:gap-4"
+        >
           {/* Job Search */}
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#6B6A6A]" />
             <input
               type="text"
+              aria-label={t("jobSearchPlaceholder")}
               placeholder={t("jobSearchPlaceholder")}
               className="w-full pl-12 pr-4 py-2 lg:py-2.5 border border-[#FEFAF9] rounded-xl bg-[#FEFAF9] shadow-sm focus:ring-2 focus:ring-[#EB611F]/30 outline-none transition text-[#2A2A2A] placeholder-[#6B6A6A]"
               value={filters.keyword}
@@ -36,6 +43,7 @@ const SearchHeader = ({ filters, handleFilterChange }) => {
             <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#6B6A6A]" />
             <input
               type="text"
+              aria-label={t("location")}
               placeholder={t("location")}
               className="w-full pl-12 pr-4 py-2 lg:py-2.5 border border-[#FEFAF9] rounded-xl bg-[#FEFAF9] shadow-sm focus:ring-2 focus:ring-[#EB611F]/30 outline-none transition text-[#2A2A2A] placeholder-[#6B6A6A]"
               value={filters.location}
@@ -44,10 +52,13 @@ const SearchHeader = ({ filters, handleFilterChange }) => {
           </div>
 
           {/* Search Button */}
-          <button className="bg-[#EB611F] hover:bg-[#d4551b] text-white px-6 lg:px-10 py-3 lg:py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 font-semibold text-base transform hover:-translate-y-0.5">
+          <button
+            type="submit"
+            className="bg-[#EB611F] hover:bg-[#d4551b] text-white px-6 lg:px-10 py-3 lg:py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 font-semibold text-base transform hover:-translate-y-0.5"
+          >
             {t("searchJobs")}
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );

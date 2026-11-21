@@ -8,11 +8,12 @@ import { useAuth } from "../../context/useAuth";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Navbar from "../../components/layout/Navbar";
 import JobCard from "../../components/Cards/JobCard";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 const SavedJobs = () => {
   const { user } = useAuth();
@@ -20,16 +21,27 @@ const SavedJobs = () => {
   const { t } = useTranslation();
 
   const [savedJobList, setSavedJobList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
 
-  const getSavedJobs = async () => {
+  const getSavedJobs = useCallback(async () => {
+    setLoading(true);
+    setLoadError(false);
     try {
       const response = await axiosInstance.get(API_PATHS.JOBS.GET_SAVED_JOBS);
+      if (!Array.isArray(response.data)) {
+        throw new Error("Saved jobs response was not a list");
+      }
       setSavedJobList(response.data);
     } catch (error) {
-      console.error("Error fetching job details:", error);
+      console.error("Error fetching saved jobs:", error);
+      setLoadError(true);
+      toast.error(t("tryAgain"));
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [t]);
 
   const handleUnsaveJob = async (jobId) => {
     try {
@@ -46,17 +58,34 @@ const SavedJobs = () => {
     if (user) {
       getSavedJobs();
     }
-  }, [user]);
+  }, [getSavedJobs, user]);
 
   return (
     <div className="bg-[#FEF7F4]/95">
       <Navbar />
       <div className="container mx-auto pt-24">
-        {savedJobList && (
+        {loading ? (
+          <LoadingSpinner />
+        ) : loadError ? (
+          <div
+            role="alert"
+            className="rounded-xl bg-white p-8 text-center text-[#6B6A6A]"
+          >
+            <p>{t("tryAgain")}</p>
+            <button
+              type="button"
+              onClick={getSavedJobs}
+              className="mt-4 rounded-lg bg-[#EB611F] px-4 py-2 font-semibold text-white"
+            >
+              {t("retry")}
+            </button>
+          </div>
+        ) : (
           <div className="bg-[#FEFAF9] p-6 rounded-2xl border border-[#FEFAF9] shadow-md">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <button
+                  type="button"
                   onClick={() => navigate(-1)}
                   aria-label={t("back")}
                   className="group flex items-center space-x-2 px-3.5 py-2.5 text-sm font-medium text-[#6B6A6A] hover:text-[#2A2A2A] bg-[#FEFAF9] hover:bg-[#EB611F]/10 border border-[#FEFAF9] hover:border-transparent rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
@@ -71,6 +100,7 @@ const SavedJobs = () => {
               <div className="flex items-center gap-3 lg:gap-4">
                 <div className="flex items-center border border-[#FEFAF9] rounded-xl p-1 bg-[#FEFAF9]">
                   <button
+                    type="button"
                     onClick={() => setViewMode("grid")}
                     aria-label={t("gridView")}
                     className={`p-2 rounded-lg transition-colors ${
@@ -82,6 +112,7 @@ const SavedJobs = () => {
                     <Grid className="w-4 h-4" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => setViewMode("list")}
                     aria-label={t("listView")}
                     className={`p-2 rounded-lg transition-colors ${
@@ -110,6 +141,7 @@ const SavedJobs = () => {
                     {t("savedJobsPrompt")}
                   </p>
                   <button
+                    type="button"
                     onClick={() => navigate(`/find-jobs`)}
                     className="bg-[#EB611F] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#d4551b] transition-colors"
                   >
@@ -130,7 +162,6 @@ const SavedJobs = () => {
                       <JobCard
                         key={jobData._id}
                         job={jobData}
-                        onClick={() => navigate(`/job/${jobData._id}`)}
                         onToggleSave={() => handleUnsaveJob(jobData._id)}
                         saved
                       />

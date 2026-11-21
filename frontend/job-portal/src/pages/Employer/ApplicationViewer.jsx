@@ -26,17 +26,23 @@ const ApplicationViewer = () => {
 
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
 
   const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
+      setLoadError(false);
       const response = await axiosInstance.get(
         API_PATHS.APPLICATIONS.GET_ALL_APPLICATIONS(jobId)
       );
+      if (!Array.isArray(response.data)) {
+        throw new Error("Applications response was not a list");
+      }
       setApplications(response.data);
     } catch (error) {
       console.error("Failed to fetch applications:", error);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -48,7 +54,9 @@ const ApplicationViewer = () => {
   }, [fetchApplications, jobId, navigate]);
 
   const groupedApplications = useMemo(() => {
-    const filtered = applications.filter((app) => app.job && app.job.title);
+    const filtered = applications.filter(
+      (app) => app.job && app.job.title && app.applicant
+    );
     return filtered.reduce((acc, app) => {
       const jobId = app.job._id;
       if (!acc[jobId]) {
@@ -63,20 +71,41 @@ const ApplicationViewer = () => {
   }, [applications]);
 
   const handleDownloadResume = (resumeUrl) => {
-    window.open(resumeUrl, "_blank");
+    try {
+      const url = new URL(resumeUrl);
+      if (url.protocol !== "https:" && url.protocol !== "http:") {
+        throw new Error("Unsupported resume URL protocol");
+      }
+      window.open(url.href, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Unable to open applicant resume:", error);
+    }
   };
 
   return (
     <DashboardLayout activeMenu='manage-jobs'>
-      {loading && (
+      {loading ? (
         <div className="min-h-screen bg-[#FEF7F4]/95 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EB611F] mx-auto"></div>
             <p className="mt-4 text-[#6B6A6A]">{t("loadingApplications")}</p>
           </div>
         </div>
-      )}
-
+      ) : loadError ? (
+        <div
+          role="alert"
+          className="min-h-screen bg-[#FEF7F4]/95 flex flex-col items-center justify-center gap-4"
+        >
+          <p className="text-[#6B6A6A]">{t("tryAgain")}</p>
+          <button
+            type="button"
+            onClick={fetchApplications}
+            className="rounded-lg bg-[#EB611F] px-4 py-2 font-semibold text-white"
+          >
+            {t("retry")}
+          </button>
+        </div>
+      ) : (
       <div className="min-h-screen bg-[#FEF7F4]/95">
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -191,18 +220,26 @@ const ApplicationViewer = () => {
                             <div className="flex items-center gap-3 mt-4 md:m-0">
                               <StatusBadge status={application.status} />
                               <button
+                                type="button"
                                 onClick={() =>
                                   handleDownloadResume(
                                     application.applicant.resume
                                   )
                                 }
-                                className="inline-flex items-center gap-2 px-3 py-2 bg-[#EB611F] text-[#FEFAF9] text-sm font-medium rounded-lg hover:bg-[#EB611F] transition-colors"
+                                disabled={!application.applicant?.resume}
+                                aria-label={
+                                  application.applicant?.resume
+                                    ? t("resumeLabel")
+                                    : t("notAvailable")
+                                }
+                                className="inline-flex items-center gap-2 px-3 py-2 bg-[#EB611F] text-[#FEFAF9] text-sm font-medium rounded-lg hover:bg-[#EB611F] transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 <Download className="h-4 w-4" />
                                 {t("resumeLabel")}
                               </button>
 
                               <button
+                                type="button"
                                 onClick={() =>
                                   setSelectedApplicant(application)
                                 }
@@ -235,6 +272,7 @@ const ApplicationViewer = () => {
           />
         )}
       </div>
+      )}
     </DashboardLayout>
   );
 };

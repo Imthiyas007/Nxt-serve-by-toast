@@ -12,6 +12,9 @@ export const API_PATHS = {
   USER: {
     UPDATE_PREFERENCES: "/api/user/preferences",
   },
+  AI: {
+    GENERATE_CONTENT: "/api/ai/generate",
+  },
 
   DASHBOARD: {
     OVERVIEW: `/api/analytics/overview`,

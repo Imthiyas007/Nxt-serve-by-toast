@@ -4,12 +4,7 @@ NxtServe is a job portal with a React 19/Vite frontend and an Express 5 API. The
 
 ## Environment setup
 
-Copy each example file to `.env` in the same directory and replace the sample values:
-
-- `backend/.env.example` → `backend/.env`
-- `frontend/job-portal/.env.example` → `frontend/job-portal/.env`
-
-The backend needs a MongoDB connection string and a private JWT signing secret. Create a strong secret with:
+Create `backend/.env` and `frontend/job-portal/.env` with the settings below. The backend needs a MongoDB connection string and a private JWT signing secret. Create a strong secret with:
 
 ```sh
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -20,7 +15,7 @@ Keep `.env` files and production secrets private. Never put database credentials
 ## Run locally
 
 1. Create a MongoDB database (for example, in MongoDB Atlas) and set `MONGO_URI` in `backend/.env`.
-2. Set `JWT_SECRET` in `backend/.env`. Keep `FRONTEND_URL=http://localhost:5173`.
+2. Set `JWT_SECRET` and `FRONTEND_URL=http://localhost:5173` in `backend/.env`. Set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` there to enable image and resume uploads. Set `GEMINI_API_KEY` there to enable interview practice.
 3. In a terminal:
 
    ```sh
@@ -37,7 +32,7 @@ Keep `.env` files and production secrets private. Never put database credentials
    npm run dev
    ```
 
-   The frontend uses `VITE_API_BASE_URL=http://localhost:5000` from its `.env` file. Set `VITE_GEMINI_API_KEY` there as well to enable interview practice.
+   The frontend uses `VITE_API_BASE_URL=http://localhost:5000` from its `.env` file. Set `GEMINI_API_KEY` in `backend/.env` to enable interview practice. Do not use a `VITE_` variable for this key.
 
 ## Deploy
 
@@ -59,6 +54,8 @@ Add these environment variables in Render's service settings:
 
 - `MONGO_URI`: the production MongoDB connection string
 - `JWT_SECRET`: a newly generated, long random secret
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`: credentials for the upload storage account
+- `GEMINI_API_KEY`: a Gemini API key for the interview-preparation feature
 - `FRONTEND_URL`: the exact deployed frontend origin, such as `https://your-site.vercel.app` (no trailing slash)
 
 Render supplies `PORT` automatically. After deployment, copy the service URL, for example `https://your-api.onrender.com`.
@@ -74,9 +71,8 @@ Import the same repository into Vercel and set:
 Set this environment variable in Vercel for the production environment:
 
 - `VITE_API_BASE_URL`: the Render API origin, for example `https://your-api.onrender.com` (no trailing slash)
-- `VITE_GEMINI_API_KEY`: a Gemini API key for the interview-preparation feature
 
-Deploy or redeploy the frontend after changing environment variables. Vite embeds them at build time, so the Gemini key is visible in the client bundle; restrict it to the Gemini API and your frontend's HTTP referrers.
+The Gemini key must be configured only on the API service. The frontend calls the API proxy, which keeps the key out of the browser bundle and applies request limits. Redeploy the API after changing its environment variables.
 
 ### 4. Verify
 
@@ -84,5 +80,5 @@ Open the deployed frontend, register or log in, and try loading the job list. If
 
 ## Deployment notes
 
-- The API stores uploaded images and resumes in its local `backend/uploads` directory. This is not durable storage on typical hosted instances and can be lost when an instance restarts or is redeployed. Use persistent storage or an object-storage service before relying on uploads in production.
+- Uploaded images and resumes are stored in Cloudinary. Configure its credentials on the API service; never put them in frontend `VITE_` variables.
 - The repository also contains Vercel configuration files. The steps above use Render for the API because it runs the Express server as a long-lived Node service; don't deploy the API using a serverless configuration without adapting and testing the server entry point for that platform.

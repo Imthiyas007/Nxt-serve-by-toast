@@ -52,12 +52,14 @@ const App = () => {
 
             <Route path="/find-jobs" element={<JobSeekerDashboard />} />
             <Route path="/job/:jobId" element={<JobDetails />} />
-            <Route path="/saved-jobs" element={<SavedJobs />} />
-            <Route path="/profile" element={<UserProfile />} />
-
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/profile" element={<UserProfile />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredRole="jobseeker" />}>
+              <Route path="/saved-jobs" element={<SavedJobs />} />
             </Route>
 
             <Route element={<ProtectedRoute requiredRole="employer" />}>
