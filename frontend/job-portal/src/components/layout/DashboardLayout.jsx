@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Briefcase, Building2, LogOut, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { NAVIGATION_MENU } from "../../utils/data";
 import ProfileDropdown from "./ProfileDropdown";
-import LanguageSwitcher from "./LanguageSwitcher";
 import { useTranslation } from "react-i18next";
 import logo from "../../assets/nxtserve-logo.png";
 
@@ -19,24 +18,29 @@ import logo from "../../assets/nxtserve-logo.png";
 // hover:bg-gray-50 → hover:bg-[#FEFAF9]
 // bg-gray-100 → bg-[#FEFAF9]
 
-const NavigationItem = ({ item, isActive, onClick, isCollapsed }) => {
+const NavigationItem = ({ item, isActive, onClick, isCollapsed, t }) => {
   const Icon = item.icon;
 
   return (
     <button
       onClick={() => onClick(item.id)}
+      aria-current={isActive ? "page" : undefined}
       className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${
         isActive
           ? "bg-[#FEFAF9] text-[#2A2A2A] shadow-sm shadow-[#FEFAF9]"
           : "text-[#6B6A6A] hover:bg-[#FEFAF9] hover:text-[#2A2A2A]"
-      }`}
+      } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB611F]`}
     >
       <Icon
         className={`h-5 w-5 flex-shrink-0 ${
           isActive ? "text-[#EB611F]" : "text-[#6B6A6A]"
         }`}
       />
-      {!isCollapsed && <span className="ml-3 truncate">{item.name}</span>}
+      {!isCollapsed && (
+        <span className="ml-3 truncate">
+          {item.id === "settings" ? t("settings") : item.name}
+        </span>
+      )}
     </button>
   );
 };
@@ -122,6 +126,7 @@ const DashboardLayout = ({ activeMenu, children }) => {
               isActive={activeNavItem === item.id}
               onClick={handleNavigation}
               isCollapsed={sidebarCollapsed}
+              t={t}
             />
           ))}
         </nav>
@@ -178,7 +183,6 @@ const DashboardLayout = ({ activeMenu, children }) => {
           </div>
 
           <div className="flex items-center space-x-3">
-            <LanguageSwitcher />
             <ProfileDropdown
               isOpen={profileDropdownOpen}
               onToggle={(e) => {

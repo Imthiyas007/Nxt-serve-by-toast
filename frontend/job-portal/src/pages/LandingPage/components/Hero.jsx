@@ -4,14 +4,15 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 import { motion as Motion, useReducedMotion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../context/AuthContext";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../../context/useAuth";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 
+const MotionLink = Motion.create(Link);
+
 const Hero = () => {
   const { user, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
   const reveal = (offset, delay = 0) => ({
@@ -23,17 +24,15 @@ const Hero = () => {
     },
   });
 
-  const handlePostJob = () => {
+  const handlePostJob = (event) => {
     if (isAuthenticated && user?.role !== "employer") {
+      event.preventDefault();
       toast.error(t("employerAccountRequired"));
-      return;
     }
-
-    navigate("/post-job");
   };
 
   return (
-    <section className="relative flex min-h-screen min-h-[calc(100svh-4rem)] items-center overflow-hidden bg-[#F6F2F0] pb-12 pt-20 sm:pb-16 sm:pt-24">
+    <section className="relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden bg-[#F6F2F0] pb-12 pt-20 sm:pb-16 sm:pt-24">
       <div className="container mx-auto px-4 lg:max-w-5xl">
         <div className="max-w-4xl mx-auto text-center">
           <Motion.h1
@@ -57,36 +56,37 @@ const Hero = () => {
             {...reveal(30, 0.4)}
             className="mb-8 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center"
           >
-            <Motion.button
+            <MotionLink
+              to="/find-jobs"
               whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
               whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
               className="group flex w-full items-center justify-center gap-2 whitespace-normal rounded-xl bg-gradient-to-r from-[#F53900] to-[#FF6B00] px-6 py-3 text-center text-base font-semibold text-white shadow-md transition-shadow duration-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900] focus-visible:ring-offset-2 sm:w-auto sm:px-8 sm:py-4 sm:text-lg"
-              onClick={() => navigate("/find-jobs")}
             >
               <Search aria-hidden="true" className="h-5 w-5 shrink-0" />
               <span>{t("findJobs")}</span>
               <ArrowRight aria-hidden="true" className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none rtl:rotate-180 rtl:group-hover:-translate-x-1" />
-            </Motion.button>
+            </MotionLink>
 
-            <Motion.button
+            <MotionLink
+              to="/post-job"
               whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
               whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
               className="w-full rounded-xl border border-[#E5E5E5] bg-white px-6 py-3 text-center text-base font-semibold text-[#676664] shadow-sm transition-shadow duration-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900] focus-visible:ring-offset-2 sm:w-auto sm:px-8 sm:py-4 sm:text-lg"
               onClick={handlePostJob}
             >
               {t("postJob")}
-            </Motion.button>
+            </MotionLink>
 
-            <Motion.button
+            <MotionLink
+              to="/interview-page"
               whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
               whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
               className="group flex w-full items-center justify-center gap-2 whitespace-normal rounded-xl border border-[#F53900]/40 bg-transparent px-6 py-3 text-center text-base font-semibold text-[#C63200] transition-colors duration-300 hover:bg-[#F53900]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900] focus-visible:ring-offset-2 sm:w-auto sm:px-8 sm:py-4 sm:text-lg"
-              onClick={() => navigate("/interview-page")}
             >
               <ClipboardCheck aria-hidden="true" className="h-5 w-5 shrink-0" />
               <span>{t("interviewPrep")}</span>
               <ArrowRight aria-hidden="true" className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none rtl:rotate-180 rtl:group-hover:-translate-x-1" />
-            </Motion.button>
+            </MotionLink>
           </Motion.div>
         </div>
       </div>

@@ -9,6 +9,9 @@ export const API_PATHS = {
     UPDATE_PROFILE: "/api/user/profile", // Update profile details
     DELETE_RESUME: "/api/user/resume", // Delete Resume details
   },
+  USER: {
+    UPDATE_PREFERENCES: "/api/user/preferences",
+  },
 
   DASHBOARD: {
     OVERVIEW: `/api/analytics/overview`,

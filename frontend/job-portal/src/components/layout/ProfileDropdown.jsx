@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 const ProfileDropdown = ({
@@ -11,13 +11,13 @@ const ProfileDropdown = ({
   onLogout,
   userRole
 }) => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
 
   return (
     <div className="relative">
       <button
         onClick={onToggle}
+        aria-expanded={isOpen}
         className="flex items-center space-x-3 p-2 rounded-xl hover:bg-[#FEFAF9] transition-colors duration-200"
       >
         {avatar ? (
@@ -49,22 +49,26 @@ const ProfileDropdown = ({
             <p className="text-xs text-[#6B6A6A]">{email}</p>
           </div>
 
-          <a
-            onClick={() =>
-              navigate(userRole === "jobseeker" ? "/profile" : "/company-profile")
-            }
+          <Link
+            to={userRole === "jobseeker" ? "/profile" : "/company-profile"}
             className="block px-4 py-2 text-sm text-[#6B6A6A] hover:bg-[#FEFAF9] transition-colors"
           >
             {t("viewProfile")}
-          </a>
+          </Link>
+          <Link
+            to="/settings"
+            className="block px-4 py-2 text-sm text-[#6B6A6A] hover:bg-[#FEFAF9] transition-colors"
+          >
+            {t("settings")}
+          </Link>
           <div className="border-t border-[#FEFAF9] mt-2 pt-2">
-            <a
-              href="#"
+            <button
+              type="button"
               onClick={onLogout}
-              className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
             >
               {t("signOut")}
-            </a>
+            </button>
           </div>
         </div>
       )}

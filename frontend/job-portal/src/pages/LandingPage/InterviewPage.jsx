@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import LanguageSwitcher from '../../components/layout/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 
 const TEXT_MODEL = 'gemini-3.5-flash-lite';
@@ -617,9 +616,6 @@ const InterviewPage = () => {
                 {/* Header with navigation */}
                 <div className="p-4 sm:p-6 bg-[#f5f1ef] dark:bg-[#7d7c7d] rounded-t-2xl border-b border-[#c9c5c3] dark:border-[#beaca7] flex flex-col items-center">
                     <h1 className="text-2xl font-bold text-[#414349] dark:text-[#fbf1ef] text-center">{t("aiInterviewPrep")}</h1>
-                    <div className="mt-3">
-                        <LanguageSwitcher />
-                    </div>
                     <div className="flex justify-center space-x-2 sm:space-x-4 mt-4 bg-[#eeeae8] dark:bg-[#414349] p-1 rounded-full shadow-inner">
                         <button 
                             onClick={() => { setView('jobAnalysis'); setMessages([]); setSelectedJobRole(null); }}

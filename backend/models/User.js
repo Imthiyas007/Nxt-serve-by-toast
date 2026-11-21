@@ -1,11 +1,13 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const SUPPORTED_LANGUAGES = require("../constants/supportedLanguages");
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ["jobseeker", "employer"], required: true },
+  preferredLanguage: { type: String, enum: SUPPORTED_LANGUAGES },
   avatar: String,
   resume: String,
   // for employer
@@ -15,7 +17,6 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Indexes for frequent queries
-userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 
 // Encrypt password before save

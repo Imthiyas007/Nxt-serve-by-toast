@@ -1,6 +1,6 @@
 import { Bookmark, Building, Building2, Calendar, MapPin } from "lucide-react";
 import moment from "moment";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import StatusBadge from "../StatusBadge";
 import { useTranslation } from "react-i18next";
 

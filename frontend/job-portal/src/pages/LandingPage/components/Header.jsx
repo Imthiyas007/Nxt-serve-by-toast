@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion as Motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../context/useAuth";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import logo from "../../../assets/nxtserve-logo.png";

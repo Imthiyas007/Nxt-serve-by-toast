@@ -11,11 +11,10 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { validateEmail } from "../../utils/helper";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosInstance";
 import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "../../components/layout/LanguageSwitcher";
 
 const Login = () => {
   const { login } = useAuth();
@@ -156,9 +155,6 @@ const Login = () => {
         transition={{ duration: 0.6 }}
         className="bg-white p-8 rounded-2xl shadow-md max-w-md w-full"
       >
-        <div className="flex justify-end mb-4">
-          <LanguageSwitcher />
-        </div>
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             {t("welcomeBack")}

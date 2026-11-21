@@ -1,13 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import i18n from "../i18n";
+import { SUPPORTED_LANGUAGES } from "../locales/languages";
+import AuthContext from "./authContext";
 
-const AuthContext = createContext();
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+const applyPreferredLanguage = (userData) => {
+  const language = userData?.preferredLanguage;
+  if (SUPPORTED_LANGUAGES.some(({ code }) => code === language)) {
+    void i18n.changeLanguage(language);
   }
-  return context;
 };
 
 export const AuthProvider = ({ children }) => {
@@ -15,12 +15,18 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    checkAuthStatus();
+  const logout = useCallback(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+
+    setUser(null);
+    setIsAuthenticated(false);
+    window.location.href = "/";
   }, []);
 
-  const checkAuthStatus = async () => {
-     try {
+  const checkAuthStatus = useCallback(async () => {
+    try {
       const token = localStorage.getItem('token');
       const userStr = localStorage.getItem('user');
 
@@ -28,6 +34,7 @@ export const AuthProvider = ({ children }) => {
         const userData = JSON.parse(userStr);
         setUser(userData);
         setIsAuthenticated(true);
+        applyPreferredLanguage(userData);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -35,7 +42,11 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [logout]);
+
+  useEffect(() => {
+    void checkAuthStatus();
+  }, [checkAuthStatus]);
 
   const login = (userData, token) => {
     localStorage.setItem('token', token);
@@ -43,16 +54,7 @@ export const AuthProvider = ({ children }) => {
 
     setUser(userData);
     setIsAuthenticated(true);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    
-    setUser(null);
-    setIsAuthenticated(false);
-    window.location.href = '/'
+    applyPreferredLanguage(userData);
   };
 
   const updateUser = (updatedUserData) => {

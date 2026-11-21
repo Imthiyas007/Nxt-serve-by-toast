@@ -22,9 +22,8 @@ import {
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import uploadImage from "../../utils/uploadImage";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "../../components/layout/LanguageSwitcher";
 
 const SignUp = () => {
   const { login } = useAuth();
@@ -198,9 +197,6 @@ const SignUp = () => {
         transition={{ duration: 0.6 }}
         className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full"
       >
-        <div className="flex justify-end mb-4">
-          <LanguageSwitcher />
-        </div>
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             {t("createAccount")}

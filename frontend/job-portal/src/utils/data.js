@@ -11,6 +11,7 @@ import {
   Building2,
   LayoutDashboard,
   Plus,
+  Settings,
 } from "lucide-react";
 
 export const jobSeekerFeatures = [
@@ -65,6 +66,7 @@ export const NAVIGATION_MENU = [
   { id: "post-job", name: "Post Job", icon: Plus },
   { id: "manage-jobs", name: "Manage Jobs", icon: Briefcase },
   { id: "company-profile", name: "Company Profile", icon: Building2 },
+  { id: "settings", name: "Settings", icon: Settings },
 ];
 
 // Categories and job types

@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { Briefcase, Bookmark } from "lucide-react";
+import { Bookmark } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import ProfileDropdown from "./ProfileDropdown";
-import LanguageSwitcher from "./LanguageSwitcher";
 import logo from "../../assets/nxtserve-logo.png";
 import { useTranslation } from "react-i18next";
 
@@ -37,7 +36,6 @@ const Navbar = () => {
 
           {/* Auth Buttons */}
           <div className="flex items-center space-x-3">
-            <LanguageSwitcher />
             {user && (
               <button
                 className="p-2 rounded-xl hover:bg-[#FEFAF9] transition-colors duration-200 relative"

@@ -7,7 +7,7 @@ import {
   Users,
 } from "lucide-react";
 import { CATEGORIES, JOB_TYPES } from "../../utils/data";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { useTranslation } from "react-i18next";
 
 const JobPostingPreview = ({ formData, setIsPreview }) => {

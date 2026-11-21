@@ -1,5 +1,25 @@
 const cloudinary = require("../config/cloudinary");
 const User = require("../models/User");
+const SUPPORTED_LANGUAGES = require("../constants/supportedLanguages");
+
+exports.updatePreferences = async (req, res) => {
+  const preferredLanguage = req.body?.preferredLanguage;
+  if (!SUPPORTED_LANGUAGES.includes(preferredLanguage)) {
+    return res.status(400).json({ message: "Unsupported language" });
+  }
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.preferredLanguage = preferredLanguage;
+    await user.save();
+
+    res.json({ preferredLanguage: user.preferredLanguage });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 // @desc    Update user profile (name, avatar, company details)
 exports.updateProfile = async (req, res) => {
