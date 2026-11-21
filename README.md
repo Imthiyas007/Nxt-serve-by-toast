@@ -56,7 +56,7 @@ Add these environment variables in Render's service settings:
 - `JWT_SECRET`: a newly generated, long random secret
 - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`: credentials for the upload storage account
 - `GEMINI_API_KEY`: a Gemini API key for the interview-preparation feature
-- `FRONTEND_URL`: the exact deployed frontend origin, such as `https://your-site.vercel.app` (no trailing slash)
+- `FRONTEND_URL`: one or more deployed frontend origins, separated by commas and without trailing slashes. The canonical `nxt-serve-by-toast.vercel.app` domain and this project's Vercel preview deployments are also allowed.
 
 Render supplies `PORT` automatically. After deployment, copy the service URL, for example `https://your-api.onrender.com`.
 

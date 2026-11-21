@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const connectDB = require("./config/db");
+const createCorsOrigin = require("./config/corsOrigin");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -15,25 +16,10 @@ const aiRoutes = require("./routes/aiRoutes");
 const app = express();
 app.set("trust proxy", 1);
 
-// Allowed frontend origins (add your deployed frontend URLs here)
-const allowedOrigins = [
-  process.env.FRONTEND_URL || "https://nxt-serve-by-toast.vercel.app",
-  "https://nxt-serve-by-toast.vercel.app",
-  "http://localhost:5173",
-];
-
 // Middleware to handle CORS
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, etc.)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: createCorsOrigin(),
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

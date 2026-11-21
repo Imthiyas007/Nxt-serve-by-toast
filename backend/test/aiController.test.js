@@ -1,6 +1,7 @@
 const { afterEach, test } = require("node:test");
 const assert = require("node:assert/strict");
 const { generateContent } = require("../controllers/aiController");
+const createCorsOrigin = require("../config/corsOrigin");
 
 const originalApiKey = process.env.GEMINI_API_KEY;
 const originalFetch = global.fetch;
@@ -12,6 +13,28 @@ afterEach(() => {
     process.env.GEMINI_API_KEY = originalApiKey;
   }
   global.fetch = originalFetch;
+});
+
+test("allows configured frontend origins and this project's Vercel previews", () => {
+  const originHandler = createCorsOrigin(
+    "https://custom.example, https://another.example"
+  );
+  const checkOrigin = (origin) =>
+    new Promise((resolve, reject) =>
+      originHandler(origin, (error, allowed) => {
+        if (error) reject(error);
+        else resolve(allowed);
+      })
+    );
+
+  return Promise.all([
+    checkOrigin("https://custom.example"),
+    checkOrigin("https://another.example"),
+    checkOrigin("https://nxt-serve-by-toast-git-main-team.vercel.app"),
+    checkOrigin("https://unrelated.example"),
+  ]).then((results) => {
+    assert.deepEqual(results, [true, true, true, false]);
+  });
 });
 
 const invoke = async (body) => {
