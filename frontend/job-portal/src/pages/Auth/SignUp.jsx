@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   User,
   Mail,
@@ -28,13 +29,15 @@ import LanguageSwitcher from "../../components/layout/LanguageSwitcher";
 const SignUp = () => {
   const { login } = useAuth();
   const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
   const MotionDiv = motion.div;
 
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
-    role: "",
+    role: location.state?.from?.pathname === "/post-job" ? "employer" : "",
     avatar: null,
   });
 
@@ -137,9 +140,17 @@ const SignUp = () => {
       const { token } = response.data;
       if (token) {
         login(response.data, token);
+        const requestedPath = location.state?.from?.pathname;
+        const destination =
+          formData.role === "employer" &&
+          requestedPath?.startsWith("/") &&
+          !requestedPath.startsWith("//")
+            ? requestedPath
+            : formData.role === "employer"
+              ? "/employer-dashboard"
+              : "/find-jobs";
         setTimeout(() => {
-          window.location.href =
-            formData.role === "employer" ? "/employer-dashboard" : "/find-jobs";
+          navigate(destination, { replace: true });
         }, 2000);
       }
     } catch (error) {
@@ -414,12 +425,13 @@ const SignUp = () => {
           <div className="text-center">
             <p className="text-gray-600">
               {t("alreadyHaveAccount")}{" "}
-              <a
-                href="/login"
+              <Link
+                to="/login"
+                state={location.state}
                 className="text-[#ff4d00] hover:text-[#e64400] font-medium"
               >
                 {t("signInHere")}
-              </a>
+              </Link>
             </p>
           </div>
         </form>

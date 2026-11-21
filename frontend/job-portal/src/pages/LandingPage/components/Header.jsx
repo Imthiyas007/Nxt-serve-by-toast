@@ -1,92 +1,168 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { Briefcase } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { motion as Motion, useReducedMotion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
-import { useTranslation } from "react-i18next"; // ✅ Added
+import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 import logo from "../../../assets/nxtserve-logo.png";
 
 const Header = () => {
   const { user, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const { t } = useTranslation(); // ✅ Hook for translations
+  const { t } = useTranslation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+
+  const handleEmployerNavigation = (event) => {
+    if (isAuthenticated && user?.role !== "employer") {
+      event.preventDefault();
+      toast.error(t("employerAccountRequired"));
+    }
+    setMobileMenuOpen(false);
+  };
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
-    <motion.header
-      initial={{ opacity: 0, y: -20 }}
+    <Motion.header
+      initial={prefersReducedMotion ? false : { opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="fixed top-0 left-0 right-0 z-50 bg-[#F6F2F0]/95 backdrop-blur-sm border-b border-[#E5E5E5]"
+      transition={{ duration: prefersReducedMotion ? 0 : 0.6 }}
+      className="fixed inset-x-0 top-0 z-50 border-b border-[#E5E5E5] bg-[#F6F2F0]/95 backdrop-blur-sm"
     >
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div className="w-20 h-25 rounded-lg flex items-center justify-center">
-              <img src={logo} alt="NxtServe Logo" className="w-22 h-20 text-white" />
-            </div>
-          </div>
+        <div className="flex h-16 items-center justify-between gap-3">
+          <Link
+            to="/"
+            aria-label="NxtServe home"
+            className="flex shrink-0 items-center"
+            onClick={closeMobileMenu}
+          >
+            <img src={logo} alt="" className="h-12 w-auto" />
+          </Link>
 
-          {/* Navigation Links - Hidden on mobile */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <a
-              onClick={() => navigate("/find-jobs")}
-              className="text-[#676664] hover:text-[#22252D] transition-colors font-medium"
+          <nav aria-label={t("mainNavigation")} className="hidden items-center gap-6 md:flex">
+            <Link
+              to="/find-jobs"
+              className="font-medium text-[#676664] transition-colors hover:text-[#22252D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900]"
             >
               {t("forJobSeeker")}
-            </a>
-            <a
-              onClick={() => {
-                navigate(
-                  isAuthenticated && user?.role === "employer"
-                    ? "/employer-dashboard"
-                    : "/login"
-                );
-              }}
-              className="text-[#676664] hover:text-[#22252D] transition-colors font-medium"
+            </Link>
+            <Link
+              to="/post-job"
+              onClick={handleEmployerNavigation}
+              className="font-medium text-[#676664] transition-colors hover:text-[#22252D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900]"
             >
               {t("forEmployers")}
-            </a>
+            </Link>
           </nav>
 
-          {/* Auth Buttons */}
-          <div className="flex items-center space-x-3">
+          <div className="hidden items-center gap-3 md:flex">
             {isAuthenticated ? (
-              <div className="flex items-center space-x-3">
-                <span className="text-[#676664]">
+              <>
+                <span className="max-w-40 truncate text-sm text-[#676664]">
                   {t("welcome")}, {user?.name}
                 </span>
-                <a
-                  href={
+                <Link
+                  to={
                     user?.role === "employer"
                       ? "/employer-dashboard"
                       : "/find-jobs"
                   }
-                  className="bg-[#F53900] text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 shadow-sm hover:shadow-md"
+                  className="rounded-lg bg-[#F53900] px-5 py-2 font-medium text-white shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900] focus-visible:ring-offset-2"
                 >
                   {t("dashboard")}
-                </a>
-              </div>
+                </Link>
+              </>
             ) : (
               <>
-                <a
-                  href="/login"
-                  className="text-[#676664] hover:text-[#22252D] transition-colors font-medium px-4 py-2 rounded-lg hover:bg-[#F6F2F0]"
+                <Link
+                  to="/login"
+                  className="rounded-lg px-4 py-2 font-medium text-[#676664] transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900]"
                 >
                   {t("login")}
-                </a>
-                <a
-                  href="/signup"
-                  className="bg-[#F53900] text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 shadow-sm hover:shadow-md"
+                </Link>
+                <Link
+                  to="/signup"
+                  className="rounded-lg bg-[#F53900] px-5 py-2 font-medium text-white shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900] focus-visible:ring-offset-2"
                 >
                   {t("signup")}
-                </a>
+                </Link>
               </>
             )}
           </div>
+
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-[#22252D] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900] md:hidden"
+            aria-label={mobileMenuOpen ? t("closeMenu") : t("openMenu")}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="landing-mobile-menu"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            {mobileMenuOpen ? (
+              <X aria-hidden="true" className="h-5 w-5" />
+            ) : (
+              <Menu aria-hidden="true" className="h-5 w-5" />
+            )}
+          </button>
         </div>
       </div>
-    </motion.header>
+
+      <nav
+        id="landing-mobile-menu"
+        aria-label={t("mainNavigation")}
+        aria-hidden={!mobileMenuOpen}
+        className={`${mobileMenuOpen ? "block" : "hidden"} border-t border-[#E5E5E5] bg-[#F6F2F0] px-4 py-4 shadow-lg md:hidden`}
+      >
+          <div className="container mx-auto flex flex-col gap-2">
+            <Link
+              to="/find-jobs"
+              onClick={closeMobileMenu}
+              className="rounded-lg px-3 py-3 font-medium text-[#676664] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900]"
+            >
+              {t("forJobSeeker")}
+            </Link>
+            <Link
+              to="/post-job"
+              onClick={handleEmployerNavigation}
+              className="rounded-lg px-3 py-3 font-medium text-[#676664] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900]"
+            >
+              {t("forEmployers")}
+            </Link>
+            {isAuthenticated ? (
+              <Link
+                to={
+                  user?.role === "employer"
+                    ? "/employer-dashboard"
+                    : "/find-jobs"
+                }
+                onClick={closeMobileMenu}
+                className="rounded-lg bg-[#F53900] px-3 py-3 font-medium text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900] focus-visible:ring-offset-2"
+              >
+                {t("dashboard")}
+              </Link>
+            ) : (
+              <div className="mt-2 flex gap-3 border-t border-[#E5E5E5] pt-3">
+                <Link
+                  to="/login"
+                  onClick={closeMobileMenu}
+                  className="flex-1 rounded-lg px-3 py-3 text-center font-medium text-[#676664] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900]"
+                >
+                  {t("login")}
+                </Link>
+                <Link
+                  to="/signup"
+                  onClick={closeMobileMenu}
+                  className="flex-1 rounded-lg bg-[#F53900] px-3 py-3 text-center font-medium text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F53900] focus-visible:ring-offset-2"
+                >
+                  {t("signup")}
+                </Link>
+              </div>
+            )}
+          </div>
+      </nav>
+    </Motion.header>
   );
 };
 

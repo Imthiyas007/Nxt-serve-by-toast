@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import Features from "./components/Features";
-import Analytics from "./components/Analytics";
 import Footer from "./components/Footer";
 import { SUPPORTED_LANGUAGES } from "../../locales/languages";
 
@@ -101,7 +100,6 @@ const LandingPage = () => {
       <Header />
       <Hero />
       <Features />
-      <Analytics />
       <Footer />
     </div>
   );

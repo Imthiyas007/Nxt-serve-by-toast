@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Mail,
   Lock,
@@ -19,6 +20,8 @@ import LanguageSwitcher from "../../components/layout/LanguageSwitcher";
 const Login = () => {
   const { login } = useAuth();
   const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
   const MotionDiv = motion.div;
 
   const [formData, setFormData] = useState({
@@ -93,10 +96,18 @@ const Login = () => {
 
       if (token) {
         login(response.data, token);
+        const requestedPath = location.state?.from?.pathname;
+        const destination =
+          role === "employer" &&
+          requestedPath?.startsWith("/") &&
+          !requestedPath.startsWith("//")
+            ? requestedPath
+            : role === "employer"
+              ? "/employer-dashboard"
+              : "/find-jobs";
 
         setTimeout(() => {
-          window.location.href =
-            role === "employer" ? "/employer-dashboard" : "/find-jobs";
+          navigate(destination, { replace: true });
         }, 2000);
       }
 
@@ -262,12 +273,13 @@ const Login = () => {
           <div className="text-center">
             <p className="text-gray-600 text-sm">
               {t("dontHaveAccount")}{" "}
-              <a
-                href="/signup"
+              <Link
+                to="/signup"
+                state={location.state}
                 className="text-[#FF4D00] hover:underline font-medium"
               >
                 {t("createAccount")}
-              </a>
+              </Link>
             </p>
           </div>
         </form>

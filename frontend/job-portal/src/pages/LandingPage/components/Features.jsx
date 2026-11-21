@@ -34,10 +34,10 @@ const Features = () => {
               {jobSeekerFeatures.map((feature, index) => (
                 <div
                   key={index}
-                  className="group flex items-start space-x-4 p-6 rounded-2xl hover:bg-[#E5E5E5] transition-all duration-300 cursor-pointer"
+                  className="flex items-start space-x-4 rounded-2xl p-6"
                 >
-                  <div className="flex-shrink-0 w-12 h-12 bg-[#E5E5E5] rounded-xl flex items-center justify-center group-hover:bg-[#F6F2F0] transition-colors">
-                    <feature.icon className="w-6 h-6 text-[#F53900]" />
+                  <div className="flex-shrink-0 w-12 h-12 bg-[#E5E5E5] rounded-xl flex items-center justify-center">
+                    <feature.icon aria-hidden="true" className="w-6 h-6 text-[#F53900]" />
                   </div>
                   <div>
                     <h4 className="text-xl font-semibold text-[#22252D] mb-2">
@@ -65,10 +65,10 @@ const Features = () => {
               {employerFeatures.map((feature, index) => (
                 <div
                   key={index}
-                  className="group flex items-start space-x-4 p-6 rounded-2xl hover:bg-[#E5E5E5] transition-all duration-300 cursor-pointer"
+                  className="flex items-start space-x-4 rounded-2xl p-6"
                 >
-                  <div className="flex-shrink-0 w-12 h-12 bg-[#E5E5E5] rounded-xl flex items-center justify-center group-hover:bg-[#F6F2F0] transition-colors">
-                    <feature.icon className="w-6 h-6 text-[#F53900]" />
+                  <div className="flex-shrink-0 w-12 h-12 bg-[#E5E5E5] rounded-xl flex items-center justify-center">
+                    <feature.icon aria-hidden="true" className="w-6 h-6 text-[#F53900]" />
                   </div>
                   <div>
                     <h4 className="text-xl font-semibold text-[#22252D] mb-2">
